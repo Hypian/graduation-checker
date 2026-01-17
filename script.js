@@ -25,6 +25,12 @@ const App = {
         const stored = localStorage.getItem('degreefi_data_v2');
         if (stored) {
             this.data = JSON.parse(stored);
+            // Migrate: Ensure all users have notifications array and normalized emails
+            this.data.users.forEach(u => {
+                if (!u.notifications) u.notifications = [];
+                if (u.email) u.email = u.email.toLowerCase().trim();
+            });
+            this.saveData();
         } else {
             // Seed initial data if new
             this.saveData();
@@ -39,7 +45,8 @@ const App = {
         // Simple session verify
         const sessionEmail = localStorage.getItem('degreefi_session_user');
         if (sessionEmail) {
-            const user = this.data.users.find(u => u.email === sessionEmail);
+            const normalizedSessionEmail = sessionEmail.toLowerCase().trim();
+            const user = this.data.users.find(u => u.email.toLowerCase().trim() === normalizedSessionEmail);
             if (user) {
                 this.loginSuccess(user);
             } else {
@@ -73,7 +80,7 @@ const App = {
         }
 
         const newUser = {
-            email,
+            email: normalizedEmail,
             password,
             role: 'student',
             name,
@@ -85,7 +92,8 @@ const App = {
                 core: { current: 0, max: 45 },
                 elective: { current: 0, max: 30 },
                 gened: { current: 0, max: 45 }
-            }
+            },
+            notifications: []
         };
 
         this.data.users.push(newUser);
@@ -104,12 +112,30 @@ const App = {
     },
 
     login(email, password, role) {
-        const user = this.data.users.find(u => u.email === email && u.password === password && u.role === role);
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = this.data.users.find(u => u.email.toLowerCase().trim() === normalizedEmail && u.password === password && u.role === role);
 
         if (user) {
             this.loginSuccess(user);
         } else {
-            this.showModal('error', 'Login Failed', 'The credentials you entered do not match our records or the selected role.');
+            const isStudent = role === 'student';
+            const title = isStudent ? 'Account Not Found' : 'Login Failed';
+            const message = isStudent
+                ? "We couldn't find a student account with those credentials. If you're new, please create an account to get started."
+                : "The credentials you entered do not match our records or the selected role.";
+
+            if (isStudent) {
+                this.showModal('warning', title, message, () => {
+                    showView('register-view');
+                    // Auto-fill email for convenience
+                    document.getElementById('reg-email').value = email;
+                }, {
+                    showCancel: true,
+                    confirmText: 'Create Account'
+                });
+            } else {
+                this.showModal('error', title, message);
+            }
         }
     },
 
@@ -216,17 +242,19 @@ const App = {
                 shell.classList.add('flex');
             }
 
-            // Route to Dashboard
-            const studentDash = document.getElementById('student-dashboard');
-            const adminDash = document.getElementById('admin-dashboard');
+            // Reset all dashboard-content views
+            document.querySelectorAll('.dashboard-content').forEach(el => el.classList.add('hidden'));
 
+            // Toggle role-specific navigation
+            const studentLinks = document.querySelectorAll('.nav-student');
             if (user.role === 'student') {
-                if (studentDash) studentDash.classList.remove('hidden');
-                if (adminDash) adminDash.classList.add('hidden');
-                StudentDashboard.render();
+                studentLinks.forEach(el => el.classList.remove('hidden'));
+                StudentDashboard.switchTab('dashboard'); // Start on dashboard
+                StudentDashboard.updateNotifBadge();
             } else {
+                studentLinks.forEach(el => el.classList.add('hidden'));
+                const adminDash = document.getElementById('admin-dashboard-view');
                 if (adminDash) adminDash.classList.remove('hidden');
-                if (studentDash) studentDash.classList.add('hidden');
                 AdminDashboard.render();
             }
 
@@ -530,6 +558,91 @@ const StudentDashboard = {
         if (points >= 2.0) return 'C';
         if (points >= 1.0) return 'D';
         return 'F';
+    },
+
+    switchTab(tabId) {
+        // Toggle Active Link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('bg-white/10', 'text-[#FFE8D6]');
+            link.classList.add('text-white/70', 'hover:text-white', 'hover:bg-white/5');
+        });
+        document.getElementById(`nav-${tabId}`).classList.add('bg-white/10', 'text-[#FFE8D6]');
+        document.getElementById(`nav-${tabId}`).classList.remove('text-white/70', 'hover:text-white', 'hover:bg-white/5');
+
+        // Toggle Views
+        document.querySelectorAll('.dashboard-content').forEach(view => view.classList.add('hidden'));
+        document.getElementById(`${tabId}-view`).classList.remove('hidden');
+
+        if (tabId === 'notifications') {
+            this.renderNotifications();
+        } else if (tabId === 'dashboard') {
+            this.render();
+        }
+    },
+
+    updateNotifBadge() {
+        if (!App.currentUser.notifications) App.currentUser.notifications = [];
+        const unreadCount = App.currentUser.notifications.filter(n => !n.read).length;
+        const badge = document.getElementById('notif-badge');
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    },
+
+    renderNotifications() {
+        const list = document.getElementById('notifications-list');
+        list.innerHTML = '';
+
+        const notifs = App.currentUser.notifications;
+
+        if (notifs.length === 0) {
+            list.innerHTML = `
+                <div class="bg-white border border-gray-100 p-12 text-center rounded-2xl shadow-sm">
+                    <div class="w-16 h-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ph-bell-slash text-3xl"></i>
+                    </div>
+                    <h3 class="text-gray-800 font-bold text-lg mb-1">Your inbox is empty</h3>
+                    <p class="text-gray-500 text-sm">Official notices from the registrar will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        [...notifs].reverse().forEach((n, idx) => {
+            const realIdx = notifs.length - 1 - idx;
+            const div = document.createElement('div');
+            div.className = `p-5 md:p-6 rounded-2xl border transition-all cursor-pointer ${n.read ? 'bg-white border-gray-100 hover:border-gray-200' : 'bg-brand-maroon/[0.02] border-brand-maroon/20 hover:border-brand-maroon/40 shadow-sm'}`;
+            div.onclick = () => this.readNotification(realIdx);
+
+            div.innerHTML = `
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${n.read ? 'bg-gray-100 text-gray-400' : 'bg-brand-maroon/10 text-brand-maroon'}">
+                        <i class="${n.read ? 'ph-envelope-open' : 'ph-envelope-simple-fill'} text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-gray-800 truncate pr-4">${n.title}</h4>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase whitespace-nowrap">${n.date}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed ${n.read ? '' : 'font-medium'}">${n.message}</p>
+                    </div>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    },
+
+    readNotification(idx) {
+        App.currentUser.notifications[idx].read = true;
+        this.syncUser();
+        this.updateNotifBadge();
+        this.renderNotifications();
+
+        const n = App.currentUser.notifications[idx];
+        App.showModal('success', n.title, n.message, null, { confirmText: 'Close' });
     }
 };
 
@@ -540,12 +653,13 @@ const StudentDashboard = {
 const AdminDashboard = {
     render() {
         const tbody = document.getElementById('student-table-body');
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         const students = App.data.users.filter(u => u.role === 'student');
 
         if (students.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500 italic">No students registered yet.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-500 italic">No students registered yet.</td></tr>';
             return;
         }
 
@@ -611,8 +725,55 @@ const AdminDashboard = {
     },
 
     sendEmail(email, isEligible) {
-        const status = isEligible ? 'Eligible' : 'Pending';
-        App.showModal('success', 'Email Sent!', `A graduation notification has been successfully dispatched to ${email}. Student Status: ${status}.`);
+        const student = App.data.users.find(u => u.email === email);
+        if (!student) return;
+
+        const requiredFiles = ["Financial Clearance", "Library Clearance", "Transcript"];
+        const uploadedTypes = student.files.map(f => f.type);
+        const missingFiles = requiredFiles.filter(req => !uploadedTypes.includes(req));
+
+        if (missingFiles.length > 0) {
+            const filesList = missingFiles.join(", ");
+            const message = `Attention: We've identified that your profile is missing the following required documents: ${filesList}. Please log in and upload these immediately to ensure you do not miss out on the upcoming graduation.`;
+
+            App.showModal('warning', 'Confirm Dispatch', `Send following warning to ${student.name}?\n\n"${message}"`, () => {
+                this.dispatchNotification(student, 'Action Required: Missing Documents', message);
+            }, {
+                showCancel: true,
+                confirmText: 'Send to Inbox & Email'
+            });
+        } else if (!isEligible) {
+            const message = `Notification Sent: Your documents are in order, but you still have pending credit requirements. Keep up the good work and finish your remaining courses to qualify for graduation!`;
+
+            App.showModal('warning', 'Confirm Dispatch', `Send progress update to ${student.name}?`, () => {
+                this.dispatchNotification(student, 'Progress Update: Requirements Pending', message);
+            }, {
+                showCancel: true,
+                confirmText: 'Send to Inbox & Email'
+            });
+        } else {
+            const message = `Congratulations! All your documents are verified and you have met all credit requirements. You are officially cleared for graduation!`;
+
+            App.showModal('warning', 'Confirm Dispatch', `Send graduation clearance to ${student.name}?`, () => {
+                this.dispatchNotification(student, 'Graduation Discovery: Officially Cleared', message);
+            }, {
+                showCancel: true,
+                confirmText: 'Send to Inbox & Email'
+            });
+        }
+    },
+
+    dispatchNotification(student, title, message) {
+        if (!student.notifications) student.notifications = [];
+        student.notifications.push({
+            id: Date.now(),
+            title,
+            message,
+            date: new Date().toLocaleDateString(),
+            read: false
+        });
+        App.saveData();
+        App.showModal('success', 'Dispatched!', `The message has been sent to ${student.name}'s account on Degreefi and an email has been sent to ${student.email}.`);
     },
 
     confirmDelete(email) {
