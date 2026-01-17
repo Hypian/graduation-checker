@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Degreefi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            peach: '#FFE8D6',
+                            maroon: '#7E2255',
+                            text: '#1F2937',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-brand-peach text-brand-text h-screen overflow-hidden font-sans">
+
+    <!-- ======================= -->
+    <!-- GLOBAL LOADER           -->
+    <!-- ======================= -->
+    <div id="loader"
+        class="fixed inset-0 z-[9999] flex flex-col items-center justify-center opacity-0 pointer-events-none invisible">
+        <div class="spinner mb-6"></div>
+        <div class="text-brand-maroon font-bold text-lg animate-pulse">Preparing your dashboard...</div>
+        <p class="text-brand-maroon/60 text-xs mt-2 font-medium uppercase tracking-widest">Optimizing Data Streams</p>
+    </div>
+
+    <!-- ======================= -->
+    <!-- CUSTOM MODAL SYSTEM     -->
+    <!-- ======================= -->
+    <div id="custom-modal"
+        class="fixed inset-0 z-[10000] flex items-center justify-center opacity-0 pointer-events-none invisible transition-all duration-300">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-brand-maroon/20 backdrop-blur-md"></div>
+
+        <!-- Modal Card -->
+        <div class="relative bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl border border-white/50 transform scale-90 transition-transform duration-300"
+            id="modal-card">
+            <div class="flex flex-col items-center text-center">
+                <div id="modal-icon-container"
+                    class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                    <i id="modal-icon" class="text-3xl"></i>
+                </div>
+
+                <h3 id="modal-title" class="text-xl font-bold text-gray-900 mb-2">Notice</h3>
+                <p id="modal-message" class="text-gray-500 text-sm leading-relaxed mb-8">Message goes here.</p>
+
+                <button onclick="App.hideModal()"
+                    class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-maroon/20 transition-all active:scale-[0.98]">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- LOGIN VIEW              -->
+    <!-- ======================= -->
+    <section id="login-view"
+        class="view fixed inset-0 z-50 flex flex-col md:flex-row bg-white overflow-y-auto md:overflow-hidden">
+
+        <!-- Left Side: Hero Image (Hidden on small mobile) -->
+        <div
+            class="hidden md:flex md:w-1/2 bg-[#FFE8D6] items-center justify-center flex-col p-12 relative overflow-hidden min-h-[400px]">
+            <!-- Decorative blobs -->
+            <div class="absolute top-10 left-10 w-24 h-24 bg-[#FFD4B5] rounded-full blur-2xl opacity-60"></div>
+            <div class="absolute bottom-20 right-20 w-40 h-40 bg-[#D4A5A5] rounded-full blur-3xl opacity-40"></div>
+
+            <!-- Floating Icons Container -->
+            <div class="relative w-full h-80 flex items-center justify-center z-10">
+                <!-- Cap -->
+                <div class="absolute animate-float-slow transition-all duration-300 hover:scale-110"
+                    style="top: 5%; left: 20%;">
+                    <i class="ph-graduation-cap-fill text-8xl text-brand-maroon/80 drop-shadow-2xl"></i>
+                </div>
+
+                <!-- Scroll -->
+                <div class="absolute animate-float-medium transition-all duration-300 hover:scale-110"
+                    style="bottom: 10%; right: 15%;">
+                    <i class="ph-scroll-fill text-7xl text-brand-maroon/60 drop-shadow-xl rotate-12"></i>
+                </div>
+
+                <!-- Book 1 -->
+                <div class="absolute animate-float-fast transition-all duration-300 hover:scale-110"
+                    style="top: 15%; right: 25%;">
+                    <i class="ph-book-open-fill text-6xl text-brand-maroon/40 drop-shadow-lg -rotate-12"></i>
+                </div>
+
+                <!-- Book 2 -->
+                <div class="absolute animate-float-reverse transition-all duration-300 hover:scale-110"
+                    style="bottom: 20%; left: 15%;">
+                    <i class="ph-book-bookmark-fill text-5xl text-brand-maroon/20 drop-shadow-md rotate-6"></i>
+                </div>
+
+                <!-- Extra Decorative Icons -->
+                <div class="absolute animate-float-slow" style="top: 40%; right: 10%; opacity: 0.2;">
+                    <i class="ph-star-fill text-3xl text-brand-maroon"></i>
+                </div>
+                <div class="absolute animate-float-medium" style="bottom: 40%; left: 10%; opacity: 0.2;">
+                    <i class="ph-sparkle-fill text-4xl text-brand-maroon"></i>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Right Side: Form -->
+        <div
+            class="w-full md:w-1/2 bg-white flex items-center justify-center p-6 md:p-8 min-h-screen md:min-h-0 relative">
+            <div class="w-full max-w-sm">
+
+                <div class="mb-10 text-center flex flex-col items-center">
+                    <div class="text-5xl font-bold text-brand-maroon flex flex-col items-center gap-2 mb-6">
+                        <i class="ph-graduation-cap-fill text-6xl"></i>
+                        <span>Degreefi</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Login to your Account</h1>
+
+                </div>
+
+                <form id="login-form" class="space-y-5">
+                    <!-- Role Toggle -->
+                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="role" value="student" checked class="peer sr-only">
+                            <div
+                                class="text-center py-1.5 text-sm font-medium text-gray-500 rounded-md peer-checked:bg-brand-maroon peer-checked:text-white transition-all">
+                                Student</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="role" value="admin" class="peer sr-only">
+                            <div
+                                class="text-center py-1.5 text-sm font-medium text-gray-500 rounded-md peer-checked:bg-brand-maroon peer-checked:text-white transition-all">
+                                Admin</div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-gray-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Email</label>
+                        <input type="email" id="login-email" placeholder="mail@abc.com"
+                            class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none transition-colors bg-gray-50/50">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-gray-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Password</label>
+                        <input type="password" id="login-password" placeholder="••••••••••••"
+                            class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none transition-colors bg-gray-50/50">
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox"
+                                class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300">
+                            <span class="text-gray-500">Remember Me</span>
+                        </label>
+                        <a href="#" class="text-brand-maroon font-bold hover:underline">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold rounded-lg py-3 text-sm shadow-lg shadow-brand-maroon/20 transition-all">Login</button>
+                </form>
+
+                <div class="mt-8 text-center text-xs text-gray-500">
+                    Not Registered Yet? <a href="#" onclick="showView('register-view')"
+                        class="text-brand-maroon font-bold hover:underline">Create an account</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================= -->
+    <!-- REGISTER VIEW           -->
+    <!-- ======================= -->
+    <section id="register-view"
+        class="view hidden fixed inset-0 z-50 flex items-center justify-center bg-[#FFE8D6] p-4 overflow-y-auto">
+        <div
+            class="bg-white/90 backdrop-blur-xl border border-white/50 p-6 md:p-10 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden my-auto">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-brand-maroon mb-2">Create Account</h2>
+                <p class="text-gray-500 text-sm">Join Degreefi today.</p>
+            </div>
+
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Full Name</label>
+                    <input type="text" id="reg-name" required placeholder="John Doe"
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Email
+                        Address</label>
+                    <input type="email" id="reg-email" required placeholder="john@university.edu"
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••"
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold rounded-lg py-2.5 text-sm shadow-md transition-all mt-4">Create
+                    Account</button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-gray-500">
+                Already have an account? <a href="#" onclick="showView('login-view')"
+                    class="text-brand-maroon font-bold hover:underline">Sign in</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================= -->
+    <!-- APP SHELL               -->
+    <!-- ======================= -->
+    <div id="app-shell" class="hidden flex flex-col md:flex-row h-screen w-full overflow-hidden">
+
+        <!-- MOBILE HEADER -->
+        <header class="md:hidden bg-brand-maroon text-white p-4 flex items-center justify-between z-40 shadow-lg">
+            <div class="flex items-center gap-2 text-lg font-bold">
+                <i class="ph-graduation-cap-fill text-brand-peach"></i>
+                <span>Degreefi</span>
+            </div>
+            <button id="mobile-menu-toggle" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                <i class="ph-list text-2xl"></i>
+            </button>
+        </header>
+
+        <!-- SIDEBAR BACKDROP (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none md:hidden"></div>
+
+        <!-- SIDEBAR -->
+        <nav id="sidebar"
+            class="fixed md:static inset-y-0 left-0 w-64 bg-brand-maroon flex flex-col justify-between flex-shrink-0 text-white z-50 transform -translate-x-full md:translate-x-0 hidden-mobile">
+            <div class="p-6">
+                <!-- Close Button (Mobile) -->
+                <button id="mobile-menu-close" class="md:hidden absolute top-4 right-4 p-2 text-white/70">
+                    <i class="ph-x text-2xl"></i>
+                </button>
+
+                <div class="hidden md:flex items-center gap-3 text-xl font-bold mb-10">
+                    <i class="ph-graduation-cap-fill text-[#FFE8D6] text-2xl"></i>
+                    <span>Degreefi</span>
+                </div>
+
+                <div class="space-y-1 mt-8 md:mt-0">
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 bg-white/10 text-[#FFE8D6] rounded-lg text-sm font-medium transition-colors">
+                        <i class="ph-squares-four text-lg"></i> Dashboard
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
+                        <i class="ph-books text-lg"></i> Courses
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
+                        <i class="ph-chart-pie-slice text-lg"></i> Requirements
+                    </a>
+                    <a href="#" onclick="App.logout()"
+                        class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors mt-8">
+                        <i class="ph-sign-out text-lg"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-white/10">
+                <div class="flex items-center gap-3">
+                    <div id="user-avatar"
+                        class="w-10 h-10 rounded-full bg-[#FFE8D6] text-brand-maroon flex items-center justify-center font-bold text-sm shadow-lg flex-shrink-0">
+                        JS</div>
+                    <div class="truncate">
+                        <p id="user-name" class="text-sm font-semibold text-white truncate">User Name</p>
+                        <p id="user-role" class="text-xs text-white/60 capitalize">Role</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 bg-[#FFF5EB] overflow-y-auto p-4 md:p-8 relative">
+
+            <!-- STUDENT DASHBOARD -->
+            <div id="student-dashboard" class="dashboard-content hidden max-w-6xl mx-auto space-y-6 md:space-y-8">
+                <header>
+                    <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Student Portal</h1>
+                    <p class="text-gray-500 text-sm md:text-base">Track your academic journey and upload requirements.
+                    </p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <!-- Progress Card -->
+                    <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm lg:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-bold text-gray-800">Overall Progress</h2>
+                            <span id="status-badge"
+                                class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold bg-gray-100 text-gray-600">In
+                                Progress</span>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                            <!-- Circular Progress -->
+                            <div class="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+                                <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
+                                    <path class="text-gray-100" stroke-width="2.5" stroke="currentColor" fill="none"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="progress-ring"
+                                        class="text-brand-maroon transition-all duration-1000 ease-out"
+                                        stroke-dasharray="0, 100" stroke-width="2.5" stroke="currentColor"
+                                        stroke-linecap="round" fill="none"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span id="total-percent"
+                                        class="text-2xl md:text-3xl font-bold text-brand-maroon">0%</span>
+                                    <span class="text-[10px] md:text-xs text-gray-400">Complete</span>
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="grid grid-cols-3 gap-4 md:gap-8 w-full text-center md:text-left">
+                                <div>
+                                    <div id="credits-earned" class="text-xl md:text-3xl font-bold text-gray-800">0</div>
+                                    <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">
+                                        Earned</div>
+                                </div>
+                                <div>
+                                    <div class="text-xl md:text-3xl font-bold text-gray-800">120</div>
+                                    <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">
+                                        Required</div>
+                                </div>
+                                <div>
+                                    <div id="gpa-display" class="text-xl md:text-3xl font-bold text-gray-800">0.0</div>
+                                    <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">GPA
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Card -->
+                    <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm">
+                        <h2 class="text-lg font-bold text-gray-800 mb-6">Add Course</h2>
+                        <form id="course-form" class="space-y-4">
+                            <div>
+                                <label
+                                    class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Course
+                                    Name</label>
+                                <input type="text" id="course-name" required placeholder="e.g. Intro to Algorithms"
+                                    class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none text-sm">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label
+                                        class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Credits</label>
+                                    <input type="number" id="course-credits" value="3" min="1" max="6"
+                                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grade</label>
+                                    <select id="course-grade"
+                                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
+                                        <option value="4.0">A</option>
+                                        <option value="3.7">A-</option>
+                                        <option value="3.3">B+</option>
+                                        <option value="3.0">B</option>
+                                        <option value="2.7">B-</option>
+                                        <option value="2.3">C+</option>
+                                        <option value="2.0">C</option>
+                                        <option value="1.0">D</option>
+                                        <option value="0.0">F</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Requirement</label>
+                                <select id="requirement-type"
+                                    class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
+                                    <option value="core">Major Core</option>
+                                    <option value="elective">Major Elective</option>
+                                    <option value="gened">General Education</option>
+                                </select>
+                            </div>
+                            <button type="submit"
+                                class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-maroon/20 mt-2">
+                                <i class="ph-plus-bold"></i> Add Course
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Requirements List -->
+                    <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm lg:col-span-2">
+                        <h2 class="text-lg font-bold text-gray-800 mb-6">Requirements Checklist</h2>
+                        <div class="space-y-6">
+                            <!-- Core -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                                id="req-core">
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-2">
+                                        <h3 class="text-sm font-bold text-gray-700">Major Core</h3>
+                                        <div class="text-xs text-gray-500"><span
+                                                class="current font-bold text-brand-maroon">0</span> / <span
+                                                class="max">45</span> Credits</div>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2">
+                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
+                                    Pending</div>
+                            </div>
+
+                            <!-- Elective -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                                id="req-elective">
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-2">
+                                        <h3 class="text-sm font-bold text-gray-700">Major Electives</h3>
+                                        <div class="text-xs text-gray-500"><span
+                                                class="current font-bold text-brand-maroon">0</span> / <span
+                                                class="max">30</span> Credits</div>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2">
+                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
+                                    Pending</div>
+                            </div>
+
+                            <!-- GenEd -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                                id="req-gened">
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-2">
+                                        <h3 class="text-sm font-bold text-gray-700">General Education</h3>
+                                        <div class="text-xs text-gray-500"><span
+                                                class="current font-bold text-brand-maroon">0</span> / <span
+                                                class="max">45</span> Credits</div>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2">
+                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
+                                    Pending</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Uploads & History Column -->
+                    <div class="space-y-6">
+                        <!-- Uploads -->
+                        <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm">
+                            <h2 class="text-lg font-bold text-gray-800 mb-6">Clearance Docs</h2>
+                            <form id="file-upload-form" class="space-y-4">
+                                <select id="file-type"
+                                    class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
+                                    <option>Financial Clearance</option>
+                                    <option>Library Clearance</option>
+                                    <option>Transcript</option>
+                                </select>
+                                <div id="drop-zone"
+                                    class="border-2 border-dashed border-gray-200 rounded-xl p-6 md:p-8 text-center cursor-pointer hover:border-brand-maroon hover:bg-[#FFE8D6]/20 transition-colors group">
+                                    <i
+                                        class="ph-cloud-arrow-up text-3xl text-gray-400 group-hover:text-brand-maroon mb-2 transition-colors"></i>
+                                    <p class="text-[10px] md:text-xs text-gray-500 uppercase tracking-wide">Tap to
+                                        upload document</p>
+                                    <input type="file" id="file-input" hidden>
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-gray-800 hover:bg-black text-white font-medium py-3 rounded-lg text-sm transition-colors shadow-md">Upload
+                                    Selected</button>
+                            </form>
+                            <div id="files-list" class="mt-4 space-y-2">
+                                <!-- Files injected here -->
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-gray-800">History</h2>
+                                <button class="text-xs text-brand-maroon font-bold hover:underline">View All</button>
+                            </div>
+                            <ul id="course-list" class="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                <li class="text-center text-gray-400 text-sm py-4 italic">No courses yet.</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN DASHBOARD -->
+            <div id="admin-dashboard" class="dashboard-content hidden max-w-6xl mx-auto space-y-6 md:space-y-8">
+                <header>
+                    <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Registrar Dashboard</h1>
+                    <p class="text-gray-500 text-sm md:text-base">Review student eligibility and process graduations.
+                    </p>
+                </header>
+
+                <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                    <div
+                        class="p-4 md:p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between sm:items-center bg-gray-50/50">
+                        <h2 class="text-lg font-bold text-gray-800">Enrolled Students</h2>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" placeholder="Search students..."
+                                class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-800 focus:border-brand-maroon outline-none w-full sm:w-auto">
+                            <button
+                                class="bg-brand-maroon hover:bg-[#631a42] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Export
+                                CSV</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left min-w-[600px]">
+                            <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-4">Student</th>
+                                    <th class="px-6 py-4">Progress</th>
+                                    <th class="px-6 py-4">Documents</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body" class="divide-y divide-gray-100">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
