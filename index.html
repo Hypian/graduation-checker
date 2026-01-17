@@ -66,10 +66,16 @@
                 <h3 id="modal-title" class="text-xl font-bold text-gray-900 mb-2">Notice</h3>
                 <p id="modal-message" class="text-gray-500 text-sm leading-relaxed mb-8">Message goes here.</p>
 
-                <button onclick="App.hideModal()"
-                    class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-maroon/20 transition-all active:scale-[0.98]">
-                    Got it
-                </button>
+                <div class="flex gap-3 w-full">
+                    <button id="modal-cancel-btn" onclick="App.hideModal(false)"
+                        class="hidden flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all active:scale-[0.98]">
+                        Cancel
+                    </button>
+                    <button id="modal-confirm-btn" onclick="App.hideModal(true)"
+                        class="flex-1 bg-brand-maroon hover:bg-[#631a42] text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-maroon/20 transition-all active:scale-[0.98]">
+                        Got it
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -215,6 +221,12 @@
                         class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
                 </div>
                 <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Registration
+                        Number</label>
+                    <input type="text" id="reg-number" required placeholder="REG/2026/001"
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50 uppercase">
+                </div>
+                <div>
                     <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Password</label>
                     <input type="password" id="reg-password" required placeholder="••••••••"
                         class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
@@ -292,7 +304,10 @@
                         JS</div>
                     <div class="truncate">
                         <p id="user-name" class="text-sm font-semibold text-white truncate">User Name</p>
-                        <p id="user-role" class="text-xs text-white/60 capitalize">Role</p>
+                        <div class="flex flex-col">
+                            <p id="user-reg" class="text-[10px] text-white/80 font-mono hidden">REG-000</p>
+                            <p id="user-role" class="text-xs text-white/60 capitalize">Role</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -303,10 +318,23 @@
 
             <!-- STUDENT DASHBOARD -->
             <div id="student-dashboard" class="dashboard-content hidden max-w-6xl mx-auto space-y-6 md:space-y-8">
-                <header>
-                    <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Student Portal</h1>
-                    <p class="text-gray-500 text-sm md:text-base">Track your academic journey and upload requirements.
-                    </p>
+                <header class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Student Portal</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Track your academic journey and upload
+                            requirements.</p>
+                    </div>
+                    <div id="student-profile-badge"
+                        class="bg-white/50 border border-white px-4 py-2 rounded-xl flex items-center gap-3 self-start md:self-auto">
+                        <div class="w-8 h-8 rounded-full bg-brand-maroon text-white flex items-center justify-center font-bold text-xs"
+                            id="student-badge-initials">JS</div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-none mb-1">
+                                Student ID</p>
+                            <p id="student-portal-reg"
+                                class="text-sm font-mono font-bold text-brand-maroon leading-none">REG/000/000</p>
+                        </div>
+                    </div>
                 </header>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -548,6 +576,7 @@
                             <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                                 <tr>
                                     <th class="px-6 py-4">Student</th>
+                                    <th class="px-6 py-4">Reg Number</th>
                                     <th class="px-6 py-4">Progress</th>
                                     <th class="px-6 py-4">Documents</th>
                                     <th class="px-6 py-4">Status</th>

@@ -50,20 +50,24 @@ const App = {
         }
     },
 
-    register(name, email, password) {
+    register(name, email, password, regNumber) {
         const normalizedEmail = email.toLowerCase().trim();
         const normalizedName = name.toLowerCase().trim();
+        const normalizedReg = regNumber.toUpperCase().trim();
 
         const duplicateUser = this.data.users.find(u =>
             u.email.toLowerCase().trim() === normalizedEmail ||
-            u.name.toLowerCase().trim() === normalizedName
+            u.name.toLowerCase().trim() === normalizedName ||
+            (u.regNumber && u.regNumber.toUpperCase().trim() === normalizedReg)
         );
 
         if (duplicateUser) {
             if (duplicateUser.email.toLowerCase().trim() === normalizedEmail) {
                 this.showModal('error', 'Email in Use', 'This email address is already linked to an account. Try logging in instead.');
-            } else {
+            } else if (duplicateUser.name.toLowerCase().trim() === normalizedName) {
                 this.showModal('warning', 'Name Taken', 'A student with this exact name is already registered. Please use your full legal name.');
+            } else {
+                this.showModal('error', 'Reg Number Taken', 'This registration number is already assigned to another student.');
             }
             return;
         }
@@ -73,6 +77,7 @@ const App = {
             password,
             role: 'student',
             name,
+            regNumber: normalizedReg,
             courses: [],
             files: [],
             requirements: {
@@ -108,13 +113,15 @@ const App = {
         }
     },
 
-    showModal(type, title, message, onConfirm = null) {
+    showModal(type, title, message, onConfirm = null, config = {}) {
         const modal = document.getElementById('custom-modal');
         const card = document.getElementById('modal-card');
         const iconContainer = document.getElementById('modal-icon-container');
         const icon = document.getElementById('modal-icon');
         const titleEl = document.getElementById('modal-title');
         const messageEl = document.getElementById('modal-message');
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
 
         // Reset classes
         iconContainer.className = 'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-inner';
@@ -127,6 +134,9 @@ const App = {
         } else if (type === 'error') {
             iconContainer.classList.add('bg-red-50', 'text-red-600');
             icon.classList.add('ph-warning-octagon-fill');
+        } else if (type === 'delete') {
+            iconContainer.classList.add('bg-red-50', 'text-red-600');
+            icon.classList.add('ph-trash-fill');
         } else {
             iconContainer.classList.add('bg-amber-50', 'text-amber-600');
             icon.classList.add('ph-warning-fill');
@@ -134,6 +144,17 @@ const App = {
 
         titleEl.textContent = title;
         messageEl.textContent = message;
+        confirmBtn.textContent = config.confirmText || 'Got it';
+
+        if (config.showCancel) {
+            cancelBtn.classList.remove('hidden');
+            confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            confirmBtn.classList.remove('bg-brand-maroon', 'hover:bg-[#631a42]');
+        } else {
+            cancelBtn.classList.add('hidden');
+            confirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            confirmBtn.classList.add('bg-brand-maroon', 'hover:bg-[#631a42]');
+        }
 
         // Save callback
         this._modalCallback = onConfirm;
@@ -145,7 +166,7 @@ const App = {
         card.classList.add('scale-100');
     },
 
-    hideModal() {
+    hideModal(confirmed = false) {
         const modal = document.getElementById('custom-modal');
         const card = document.getElementById('modal-card');
 
@@ -156,10 +177,10 @@ const App = {
 
         setTimeout(() => {
             modal.classList.add('invisible');
-            if (this._modalCallback) {
+            if (confirmed && this._modalCallback) {
                 this._modalCallback();
-                this._modalCallback = null;
             }
+            this._modalCallback = null;
         }, 300);
     },
 
@@ -176,6 +197,16 @@ const App = {
             if (nameEl) nameEl.textContent = user.name;
             if (roleEl) roleEl.textContent = user.role;
             if (avatarEl) avatarEl.textContent = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            const regEl = document.getElementById('user-reg');
+            if (regEl) {
+                if (user.role === 'student' && user.regNumber) {
+                    regEl.textContent = user.regNumber;
+                    regEl.classList.remove('hidden');
+                } else {
+                    regEl.classList.add('hidden');
+                }
+            }
 
             // Show App Shell
             document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
@@ -264,13 +295,22 @@ const App = {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
-            this.register(name, email, password);
+            const regNumber = document.getElementById('reg-number').value;
+            this.register(name, email, password, regNumber);
         });
 
         // Mobile Sidebar Events
         document.getElementById('mobile-menu-toggle').onclick = () => this.toggleMobileMenu(true);
         document.getElementById('mobile-menu-close').onclick = () => this.toggleMobileMenu(false);
         document.getElementById('sidebar-overlay').onclick = () => this.toggleMobileMenu(false);
+
+        // Auto-capitalize Reg Number
+        const regInput = document.getElementById('reg-number');
+        if (regInput) {
+            regInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
     },
 
     setupMobileMenu() {
@@ -315,6 +355,14 @@ const StudentDashboard = {
         this.renderHistory();
         this.renderReqs();
         this.renderFiles();
+        this.renderProfile();
+    },
+
+    renderProfile() {
+        const regEl = document.getElementById('student-portal-reg');
+        const initialsEl = document.getElementById('student-badge-initials');
+        if (regEl) regEl.textContent = App.currentUser.regNumber || 'N/A';
+        if (initialsEl) initialsEl.textContent = App.currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     },
 
     bindEvents() {
@@ -520,25 +568,42 @@ const AdminDashboard = {
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-24 bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-sky-500 h-full" style="width: ${Math.min(100, percent)}%"></div>
-                        </div>
-                        <span class="text-xs font-medium text-slate-400">${percent}%</span>
-                    </div>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="bg-slate-700 text-slate-300 text-xs px-2 py-1 rounded-md">${student.files.length} Files</span>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded-full text-xs font-bold ${isEligible ? 'bg-green-500/10 text-green-400' : 'bg-sky-500/10 text-sky-400'}">
-                        ${isEligible ? 'Eligible' : 'In Progress'}
+                    <span class="text-sm font-mono font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded">
+                        ${student.regNumber || 'N/A'}
                     </span>
                 </td>
                 <td class="px-6 py-4">
-                    <button onclick="AdminDashboard.sendEmail('${student.email}', ${isEligible})" class="text-slate-400 hover:text-white transition-colors bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs font-medium">
-                        Email
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden shadow-inner">
+                            <div class="h-full rounded-full transition-all duration-700 ${isEligible ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-sky-400 to-indigo-500'}" style="width: ${Math.min(100, percent)}%"></div>
+                        </div>
+                        <span class="text-xs font-bold text-gray-500 w-8 text-right">${percent}%</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide border border-gray-200">
+                        <i class="ph-files-fill mr-1 opacity-50"></i> ${student.files.length} Docs
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${isEligible ? 'bg-green-100 text-green-700 border border-green-200 shadow-sm shadow-green-100' : 'bg-amber-100 text-amber-700 border border-amber-200 shadow-sm shadow-amber-100'}">
+                        <span class="w-1.5 h-1.5 rounded-full mr-2 ${isEligible ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}"></span>
+                        ${isEligible ? 'Graduated' : 'Pending'}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="AdminDashboard.sendEmail('${student.email}', ${isEligible})" 
+                            class="p-2 text-brand-maroon hover:bg-brand-maroon hover:text-white rounded-lg transition-all border border-brand-maroon/20 bg-white shadow-sm"
+                            title="Send Notification">
+                            <i class="ph-paper-plane-tilt-fill text-lg"></i>
+                        </button>
+                        <button onclick="AdminDashboard.confirmDelete('${student.email}')" 
+                            class="p-2 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all border border-red-200 bg-white shadow-sm"
+                            title="Delete Student">
+                            <i class="ph-trash-fill text-lg"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -546,10 +611,26 @@ const AdminDashboard = {
     },
 
     sendEmail(email, isEligible) {
-        if (isEligible) {
-            alert(`Email sent to ${email}:\n\n"Congratulations! You are eligible for graduation!"`);
-        } else {
-            alert(`Email sent to ${email}:\n\n"Reminder: You still have requirements pending."`);
+        const status = isEligible ? 'Eligible' : 'Pending';
+        App.showModal('success', 'Email Sent!', `A graduation notification has been successfully dispatched to ${email}. Student Status: ${status}.`);
+    },
+
+    confirmDelete(email) {
+        App.showModal('delete', 'Delete Student?', `Are you sure you want to remove ${email} from the system? This action cannot be undone.`, () => {
+            this.deleteStudent(email);
+        }, {
+            showCancel: true,
+            confirmText: 'Delete Now'
+        });
+    },
+
+    deleteStudent(email) {
+        const idx = App.data.users.findIndex(u => u.email === email);
+        if (idx !== -1) {
+            App.data.users.splice(idx, 1);
+            App.saveData();
+            this.render();
+            App.showModal('success', 'Student Removed', 'The student record has been permanently deleted from the database.');
         }
     }
 };
