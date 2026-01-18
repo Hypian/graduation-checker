@@ -1388,8 +1388,6 @@ const AdminDashboard = {
         const title = titleEl ? titleEl.value.trim() : '';
         const message = bodyEl ? bodyEl.value.trim() : '';
 
-        console.log("Attempting to send message:", { title, message, user: this.currentReviewUser });
-
         if (!title || !message) {
             App.showModal('warning', 'Empty Fields', 'Please provide both a title and a message body.');
             return;
@@ -1400,14 +1398,12 @@ const AdminDashboard = {
             return;
         }
 
-        // Use AdminDashboard explicitly to avoid 'this' issues
-        AdminDashboard.dispatchNotification(this.currentReviewUser, title, message, false);
+        // Dispatch notification with feedback enabled
+        AdminDashboard.dispatchNotification(this.currentReviewUser, title, message, true);
 
         // Clear fields
         if (titleEl) titleEl.value = '';
         if (bodyEl) bodyEl.value = '';
-
-        App.showModal('success', 'Message Dispatched', `Your notification has been sent to ${this.currentReviewUser.name}.`);
     },
 
     _dummy() { }
