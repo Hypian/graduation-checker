@@ -203,6 +203,13 @@
         class="view hidden fixed inset-0 z-50 flex items-center justify-center bg-[#FFE8D6] p-4 overflow-y-auto">
         <div
             class="bg-white/90 backdrop-blur-xl border border-white/50 p-6 md:p-10 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden my-auto">
+
+            <!-- Back Button -->
+            <button onclick="showView('login-view')"
+                class="absolute top-6 left-6 text-gray-400 hover:text-brand-maroon transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-widest">
+                <i class="ph-arrow-left-bold"></i> Back
+            </button>
+
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-brand-maroon mb-2">Create Account</h2>
                 <p class="text-gray-500 text-sm">Join Degreefi today.</p>
@@ -380,12 +387,12 @@
                                 <div>
                                     <div id="credits-earned" class="text-xl md:text-3xl font-bold text-gray-800">0</div>
                                     <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">
-                                        Earned</div>
+                                        Subjects</div>
                                 </div>
                                 <div>
-                                    <div class="text-xl md:text-3xl font-bold text-gray-800">120</div>
+                                    <div class="text-xl md:text-3xl font-bold text-gray-800">61</div>
                                     <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">
-                                        Required</div>
+                                        Total Req</div>
                                 </div>
                                 <div>
                                     <div id="gpa-display" class="text-xl md:text-3xl font-bold text-gray-800">0.0</div>
@@ -407,38 +414,20 @@
                                 <input type="text" id="course-name" required placeholder="e.g. Intro to Algorithms"
                                     class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none text-sm">
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label
-                                        class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Credits</label>
-                                    <input type="number" id="course-credits" value="3" min="1" max="6"
-                                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grade</label>
-                                    <select id="course-grade"
-                                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
-                                        <option value="4.0">A</option>
-                                        <option value="3.7">A-</option>
-                                        <option value="3.3">B+</option>
-                                        <option value="3.0">B</option>
-                                        <option value="2.7">B-</option>
-                                        <option value="2.3">C+</option>
-                                        <option value="2.0">C</option>
-                                        <option value="1.0">D</option>
-                                        <option value="0.0">F</option>
-                                    </select>
-                                </div>
-                            </div>
                             <div>
                                 <label
-                                    class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Requirement</label>
-                                <select id="requirement-type"
+                                    class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grade</label>
+                                <select id="course-grade"
                                     class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
-                                    <option value="core">Major Core</option>
-                                    <option value="elective">Major Elective</option>
-                                    <option value="gened">General Education</option>
+                                    <option value="4.0">A</option>
+                                    <option value="3.7">A-</option>
+                                    <option value="3.3">B+</option>
+                                    <option value="3.0">B</option>
+                                    <option value="2.7">B-</option>
+                                    <option value="2.3">C+</option>
+                                    <option value="2.0">C</option>
+                                    <option value="1.0">D</option>
+                                    <option value="0.0">F</option>
                                 </select>
                             </div>
                             <button type="submit"
@@ -452,64 +441,79 @@
                     <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm lg:col-span-2">
                         <h2 class="text-lg font-bold text-gray-800 mb-6">Requirements Checklist</h2>
                         <div class="space-y-6">
-                            <!-- Core -->
+                            <!-- Subjects -->
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                                id="req-core">
+                                id="req-subjects">
                                 <div class="flex-1">
                                     <div class="flex justify-between mb-2">
-                                        <h3 class="text-sm font-bold text-gray-700">Major Core</h3>
+                                        <h3 class="text-sm font-bold text-gray-700">Academic Subjects</h3>
                                         <div class="text-xs text-gray-500"><span
                                                 class="current font-bold text-brand-maroon">0</span> / <span
-                                                class="max">45</span> Credits</div>
+                                                class="max">61</span> Subjects</div>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-2">
-                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
+                                    <div class="w-full bg-gray-100 rounded-full h-2 shadow-inner">
+                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500 shadow-sm"
                                             style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <div
-                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
-                                    Pending</div>
+                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100/50 text-brand-maroon whitespace-nowrap self-start sm:self-center">
+                                    0%</div>
                             </div>
 
-                            <!-- Elective -->
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                                id="req-elective">
-                                <div class="flex-1">
-                                    <div class="flex justify-between mb-2">
-                                        <h3 class="text-sm font-bold text-gray-700">Major Electives</h3>
-                                        <div class="text-xs text-gray-500"><span
-                                                class="current font-bold text-brand-maroon">0</span> / <span
-                                                class="max">30</span> Credits</div>
+                            <!-- Internship -->
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all hover:border-brand-maroon/20"
+                                id="req-internship">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-brand-maroon shadow-sm border border-gray-100">
+                                        <i class="ph-briefcase text-xl"></i>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-2">
-                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
-                                            style="width: 0%"></div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-gray-800">Academic Internship</h3>
+                                        <p class="text-[10px] text-gray-500 uppercase tracking-tighter">BBICT Core
+                                            Requirement</p>
                                     </div>
                                 </div>
-                                <div
-                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
-                                    Pending</div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="internship-toggle" class="sr-only peer"
+                                        onchange="StudentDashboard.toggleMilestone('hasInternship')">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-maroon">
+                                    </div>
+                                </label>
                             </div>
 
-                            <!-- GenEd -->
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                                id="req-gened">
-                                <div class="flex-1">
-                                    <div class="flex justify-between mb-2">
-                                        <h3 class="text-sm font-bold text-gray-700">General Education</h3>
-                                        <div class="text-xs text-gray-500"><span
-                                                class="current font-bold text-brand-maroon">0</span> / <span
-                                                class="max">45</span> Credits</div>
+                            <!-- Project Defense -->
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all hover:border-brand-maroon/20"
+                                id="req-defense">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-brand-maroon shadow-sm border border-gray-100">
+                                        <i class="ph-presentation-chart text-xl"></i>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-2">
-                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500"
-                                            style="width: 0%"></div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-gray-800">Final Project Defense</h3>
+                                        <p class="text-[10px] text-gray-500 uppercase tracking-tighter">BBICT Final
+                                            Milestone</p>
                                     </div>
                                 </div>
-                                <div
-                                    class="req-status text-[10px] font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap self-start sm:self-center">
-                                    Pending</div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="defense-toggle" class="sr-only peer"
+                                        onchange="StudentDashboard.toggleMilestone('hasProject')">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-maroon">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Milestone Documents -->
+                            <div class="space-y-3">
+                                <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Mandatory
+                                    Clearance & Milestones</h3>
+                                <div id="milestone-docs-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- Populated by JS -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -525,6 +529,8 @@
                                     <option>Financial Clearance</option>
                                     <option>Library Clearance</option>
                                     <option>Transcript</option>
+                                    <option>Academic Internship</option>
+                                    <option>Project Defense</option>
                                 </select>
                                 <div id="drop-zone"
                                     class="border-2 border-dashed border-gray-200 rounded-xl p-6 md:p-8 text-center cursor-pointer hover:border-brand-maroon hover:bg-[#FFE8D6]/20 transition-colors group">
@@ -532,7 +538,24 @@
                                         class="ph-cloud-arrow-up text-3xl text-gray-400 group-hover:text-brand-maroon mb-2 transition-colors"></i>
                                     <p class="text-[10px] md:text-xs text-gray-500 uppercase tracking-wide">Tap to
                                         upload document</p>
-                                    <input type="file" id="file-input" hidden>
+                                    <p class="text-[8px] text-gray-400 mt-1 italic">PDF, Word, or Images (Max 1 per
+                                        category)</p>
+
+                                    <!-- Satisfying Progress Bar -->
+                                    <div id="upload-progress-container"
+                                        class="mt-4 hidden animate-in fade-in zoom-in duration-300">
+                                        <div
+                                            class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-200">
+                                            <div id="upload-progress-bar"
+                                                class="bg-brand-maroon h-full w-0 transition-all ease-out duration-300 shadow-[0_0_10px_rgba(151,33,48,0.3)]">
+                                            </div>
+                                        </div>
+                                        <p
+                                            class="text-[8px] font-bold text-brand-maroon mt-2 uppercase tracking-widest animate-pulse">
+                                            Processing Document...</p>
+                                    </div>
+
+                                    <input type="file" id="file-input" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                                 </div>
                                 <button type="submit"
                                     class="w-full bg-gray-800 hover:bg-black text-white font-medium py-3 rounded-lg text-sm transition-colors shadow-md">Upload
@@ -561,11 +584,15 @@
             <!-- NOTIFICATIONS VIEW -->
             <div id="notifications-view" class="dashboard-content hidden max-w-4xl mx-auto space-y-6 md:space-y-8">
                 <header class="flex justify-between items-end border-b border-gray-100 pb-6">
-                    <div>
+                    <div class="flex-1">
                         <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Inbox</h1>
                         <p class="text-gray-500 text-sm md:text-base">Official communications regarding your graduation
                             status.</p>
                     </div>
+                    <button onclick="StudentDashboard.markAllNotificationsRead()"
+                        class="px-4 py-2 bg-gray-50 text-gray-500 hover:bg-brand-maroon/10 hover:text-brand-maroon rounded-xl text-xs font-bold uppercase tracking-widest transition-all mb-1">
+                        <i class="ph-check-square-offset mr-1"></i> Mark all as read
+                    </button>
                 </header>
 
                 <div id="notifications-list" class="space-y-4">
@@ -584,7 +611,25 @@
                 <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                     <div
                         class="p-4 md:p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between sm:items-center bg-gray-50/50">
-                        <h2 class="text-lg font-bold text-gray-800">Enrolled Students</h2>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <h2 class="text-lg font-bold text-gray-800">Enrolled Students</h2>
+                            <!-- Bulk Actions (Hidden by default) -->
+                            <div id="bulk-actions"
+                                class="hidden flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                                <div class="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
+                                <span id="selection-count"
+                                    class="text-[10px] font-bold text-brand-maroon uppercase tracking-widest mr-2">0
+                                    Selected</span>
+                                <button onclick="AdminDashboard.bulkEmail()"
+                                    class="flex items-center gap-1 px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all">
+                                    <i class="ph-paper-plane-tilt-fill"></i> Email
+                                </button>
+                                <button onclick="AdminDashboard.confirmBulkDelete()"
+                                    class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-600 hover:text-white transition-all">
+                                    <i class="ph-trash-fill"></i> Delete
+                                </button>
+                            </div>
+                        </div>
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="text" placeholder="Search students..."
                                 class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-800 focus:border-brand-maroon outline-none w-full sm:w-auto">
@@ -598,12 +643,17 @@
                         <table class="w-full text-left min-w-[600px]">
                             <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                                 <tr>
+                                    <th class="px-6 py-4 w-10">
+                                        <input type="checkbox" id="select-all-students"
+                                            onclick="AdminDashboard.toggleAll(this.checked)"
+                                            class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer">
+                                    </th>
                                     <th class="px-6 py-4">Student</th>
                                     <th class="px-6 py-4">Reg Number</th>
                                     <th class="px-6 py-4">Progress</th>
                                     <th class="px-6 py-4">Documents</th>
                                     <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Action</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="student-table-body" class="divide-y divide-gray-100">
@@ -618,6 +668,110 @@
     </div>
 
     <script src="script.js"></script>
-</body>
+
+    <!-- ======================= -->
+    <!-- ADMIN REVIEW MODAL      -->
+    <!-- ======================= -->
+    <div id="admin-review-modal" class="fixed inset-0 z-[10001] hidden overflow-y-auto">
+        <div class="absolute inset-0 bg-brand-maroon/40 backdrop-blur-md" onclick="AdminDashboard.closeReview()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+                class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300">
+                <div class="flex h-[80vh] flex-col md:flex-row">
+                    <!-- Sidebar: Student Info -->
+                    <div
+                        class="w-full md:w-80 bg-gray-50 p-8 flex flex-col items-center text-center border-r border-gray-100">
+                        <div id="review-avatar"
+                            class="w-24 h-24 rounded-3xl bg-brand-maroon text-white flex items-center justify-center text-3xl font-bold mb-6 shadow-xl shadow-brand-maroon/20">
+                            JS</div>
+                        <h2 id="review-name" class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Student Name
+                        </h2>
+                        <p id="review-reg"
+                            class="text-sm font-mono font-bold text-brand-maroon bg-brand-maroon/10 px-3 py-1 rounded-full mb-8">
+                            REG/2026/001</p>
+
+                        <div class="w-full space-y-4 mb-auto">
+                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Completion
+                                </p>
+                                <div class="flex items-center justify-between">
+                                    <span id="review-percent" class="text-2xl font-bold text-brand-maroon">0%</span>
+                                    <div class="w-10 h-10">
+                                        <svg viewBox="0 0 36 36" class="transform -rotate-90">
+                                            <path class="text-gray-100" stroke-width="3" stroke="currentColor"
+                                                fill="none"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path id="review-progress-ring" class="text-brand-maroon"
+                                                stroke-dasharray="0, 100" stroke-width="3" stroke="currentColor"
+                                                stroke-linecap="round" fill="none"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="AdminDashboard.closeReview()"
+                            class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-2xl transition-all">Close
+                            Editor</button>
+                    </div>
+
+                    <!-- Main Area: Tabs -->
+                    <div class="flex-1 flex flex-col overflow-hidden">
+                        <div class="flex border-b border-gray-100 p-2 gap-2 bg-white">
+                            <button onclick="AdminDashboard.switchReviewTab('courses')" id="tab-courses"
+                                class="review-tab active flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all">Subjects</button>
+                            <button onclick="AdminDashboard.switchReviewTab('clearance')" id="tab-clearance"
+                                class="review-tab flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all">Clearance</button>
+                            <button onclick="AdminDashboard.switchReviewTab('message')" id="tab-message"
+                                class="review-tab flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all">Send
+                                Message</button>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-8">
+                            <!-- Subjects Tab -->
+                            <div id="review-section-courses" class="review-section space-y-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-bold text-gray-800">Academic Subjects</h3>
+                                    <span id="review-subject-count" class="text-xs font-bold text-brand-maroon">0 /
+                                        61</span>
+                                </div>
+                                <div id="review-subjects-list" class="space-y-2">
+                                    <!-- Populated -->
+                                </div>
+                            </div>
+
+                            <!-- Clearance Tab -->
+                            <div id="review-section-clearance" class="review-section hidden space-y-4">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">Milestones & Clearance</h3>
+                                <div id="review-clearance-list" class="grid grid-cols-1 gap-3">
+                                    <!-- Populated -->
+                                </div>
+                            </div>
+
+                            <!-- Message Tab -->
+                            <div id="review-section-message" class="review-section hidden space-y-6">
+                                <div>
+                                    <label
+                                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Custom
+                                        Notification</label>
+                                    <input type="text" id="review-msg-title"
+                                        placeholder="Topic: e.g. Internship Document Issue"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-maroon mb-4">
+                                    <textarea id="review-msg-body" rows="6"
+                                        placeholder="Write your detailed message to the student here..."
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-maroon resize-none"></textarea>
+                                </div>
+                                <button onclick="AdminDashboard.sendCustomMessage()"
+                                    class="w-full bg-brand-maroon hover:bg-[#631a42] text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-maroon/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                                    <i class="ph-paper-plane-tilt-bold"></i> Dispatch Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </html>
