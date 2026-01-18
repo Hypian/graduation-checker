@@ -469,17 +469,30 @@ const StudentDashboard = {
     },
 
     addCourse() {
-        const name = document.getElementById('course-name').value;
+        const name = document.getElementById('course-name').value.trim();
         const grade = parseFloat(document.getElementById('course-grade').value);
+
+        if (!name) {
+            App.showModal('warning', 'Missing Information', 'Please enter a course name.');
+            return;
+        }
 
         if (App.currentUser.requirements.subjects.current >= 61) {
             App.showModal('warning', 'Limit Reached', 'You have already added 61 subjects. Please remove one if you need to replace it.');
             return;
         }
 
+        // Check for duplicate course names (case-insensitive)
+        const normalizedName = name.toUpperCase();
+        const duplicate = App.currentUser.courses.find(c => c.name.toUpperCase() === normalizedName);
+        if (duplicate) {
+            App.showModal('warning', 'Duplicate Course', `You have already added "${duplicate.name}". Please use a different course name or remove the existing one first.`);
+            return;
+        }
+
         const course = {
             id: Date.now(),
-            name: name.toUpperCase(), // Force capitalize
+            name: normalizedName, // Store in uppercase
             grade,
             date: new Date().toLocaleDateString()
         };
