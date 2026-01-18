@@ -771,20 +771,29 @@ const StudentDashboard = {
         [...App.currentUser.courses].reverse().forEach(c => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 text-sm hover:border-brand-maroon/20 transition-all group';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all';
+            deleteBtn.title = 'Delete course';
+            deleteBtn.innerHTML = '<i class="ph-trash text-sm"></i>';
+            deleteBtn.onclick = () => this.confirmDeleteCourse(c.id);
+
+            const gradeDiv = document.createElement('div');
+            gradeDiv.className = 'text-brand-maroon font-bold';
+            gradeDiv.textContent = this.getGradeLetter(c.grade);
+
+            const rightDiv = document.createElement('div');
+            rightDiv.className = 'flex items-center gap-2';
+            rightDiv.appendChild(gradeDiv);
+            rightDiv.appendChild(deleteBtn);
+
             li.innerHTML = `
                 <div class="flex-1">
                     <div class="text-sm font-medium text-gray-800">${c.name}</div>
                     <div class="text-[10px] text-gray-500">Subject ${App.currentUser.courses.indexOf(c) + 1}</div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div class="text-brand-maroon font-bold">${this.getGradeLetter(c.grade)}</div>
-                    <button onclick="StudentDashboard.confirmDeleteCourse(${c.id})" 
-                        class="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        title="Delete course">
-                        <i class="ph-trash text-sm"></i>
-                    </button>
-                </div>
             `;
+            li.appendChild(rightDiv);
             list.appendChild(li);
         });
     },
