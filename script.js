@@ -479,7 +479,7 @@ const StudentDashboard = {
 
         const course = {
             id: Date.now(),
-            name,
+            name: name.toUpperCase(), // Force capitalize
             grade,
             date: new Date().toLocaleDateString()
         };
