@@ -5,166 +5,199 @@
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 3px;
+  background: #334155;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+  background: #475569;
 }
 
 /* Animations that are complex to do with utility classes alone */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .view {
-    animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
 .dashboard-content {
-    animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.5s ease-out;
 }
 
 /* Circular Progress Transitions */
 .circular-chart .circle {
-    transition: stroke-dasharray 0.6s ease;
+  transition: stroke-dasharray 0.6s ease;
 }
 
 /* Glass effect tweaks */
 .glass {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Levitation Animations */
 @keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
+  0% {
+    transform: translateY(0px);
+  }
 
-    50% {
-        transform: translateY(-20px);
-    }
+  50% {
+    transform: translateY(-20px);
+  }
 
-    100% {
-        transform: translateY(0px);
-    }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 @keyframes float-delayed {
-    0% {
-        transform: translateY(0px);
-    }
+  0% {
+    transform: translateY(0px);
+  }
 
-    50% {
-        transform: translateY(-15px);
-    }
+  50% {
+    transform: translateY(-15px);
+  }
 
-    100% {
-        transform: translateY(0px);
-    }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 @keyframes float-reverse {
-    0% {
-        transform: translateY(0px);
-    }
+  0% {
+    transform: translateY(0px);
+  }
 
-    50% {
-        transform: translateY(15px);
-    }
+  50% {
+    transform: translateY(15px);
+  }
 
-    100% {
-        transform: translateY(0px);
-    }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float-slow {
-    animation: float 8s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
 }
 
 .animate-float-medium {
-    animation: float-delayed 6s ease-in-out infinite;
-    animation-delay: 1s;
+  animation: float-delayed 6s ease-in-out infinite;
+  animation-delay: 1s;
 }
 
 .animate-float-fast {
-    animation: float 5s ease-in-out infinite;
-    animation-delay: 0.5s;
+  animation: float 5s ease-in-out infinite;
+  animation-delay: 0.5s;
 }
 
 .animate-float-reverse {
-    animation: float-reverse 7s ease-in-out infinite;
-    animation-delay: 2s;
+  animation: float-reverse 7s ease-in-out infinite;
+  animation-delay: 2s;
 }
 
 /* Mobile Sidebar Transitions */
 #sidebar {
-    transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 }
 
 #sidebar-overlay {
-    transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
 @media (max-width: 768px) {
-    #sidebar.hidden-mobile {
-        transform: translateX(-100%);
-    }
+  #sidebar.hidden-mobile {
+    transform: translateX(-100%);
+  }
 }
 
 /* Loader Overlay */
 #loader {
-    background: rgba(255, 232, 214, 0.95);
-    backdrop-filter: blur(12px);
-    transition: opacity 0.5s ease-in-out, visibility 0.5s;
+  background: rgba(255, 232, 214, 0.95);
+  backdrop-filter: blur(12px);
+  transition: opacity 0.5s ease-in-out, visibility 0.5s;
 }
 
 /* Premium Spinner */
 .spinner {
-    width: 80px;
-    height: 80px;
-    border: 6px solid transparent;
-    border-top: 6px solid #7E2255;
-    border-radius: 50%;
-    animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-    position: relative;
+  width: 80px;
+  height: 80px;
+  border: 6px solid transparent;
+  border-top: 6px solid #7e2255;
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+  position: relative;
 }
 
 .spinner::after {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 6px solid transparent;
-    border-bottom: 6px solid rgba(126, 34, 85, 0.2);
-    animation: spin 1.5s linear infinite reverse;
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 6px solid transparent;
+  border-bottom: 6px solid rgba(126, 34, 85, 0.2);
+  animation: spin 1.5s linear infinite reverse;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
 
-    100% {
-        transform: rotate(360deg);
-    }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Floating Icon Positions */
+.floating-top-left {
+  top: 5%;
+  left: 20%;
+}
+
+.floating-bottom-right {
+  bottom: 10%;
+  right: 15%;
+}
+
+.floating-top-right {
+  top: 15%;
+  right: 25%;
+}
+
+.floating-bottom-left {
+  bottom: 20%;
+  left: 15%;
+}
+
+.floating-mid-right {
+  top: 40%;
+  right: 10%;
+  opacity: 0.2;
+}
+
+.floating-mid-left {
+  bottom: 40%;
+  left: 10%;
+  opacity: 0.2;
 }

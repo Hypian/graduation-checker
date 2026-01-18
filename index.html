@@ -96,34 +96,30 @@
             <!-- Floating Icons Container -->
             <div class="relative w-full h-80 flex items-center justify-center z-10">
                 <!-- Cap -->
-                <div class="absolute animate-float-slow transition-all duration-300 hover:scale-110"
-                    style="top: 5%; left: 20%;">
+                <div class="absolute animate-float-slow transition-all duration-300 hover:scale-110 floating-top-left">
                     <i class="ph-graduation-cap-fill text-8xl text-brand-maroon/80 drop-shadow-2xl"></i>
                 </div>
 
                 <!-- Scroll -->
-                <div class="absolute animate-float-medium transition-all duration-300 hover:scale-110"
-                    style="bottom: 10%; right: 15%;">
+                <div class="absolute animate-float-medium transition-all duration-300 hover:scale-110 floating-bottom-right">
                     <i class="ph-scroll-fill text-7xl text-brand-maroon/60 drop-shadow-xl rotate-12"></i>
                 </div>
 
                 <!-- Book 1 -->
-                <div class="absolute animate-float-fast transition-all duration-300 hover:scale-110"
-                    style="top: 15%; right: 25%;">
+                <div class="absolute animate-float-fast transition-all duration-300 hover:scale-110 floating-top-right">
                     <i class="ph-book-open-fill text-6xl text-brand-maroon/40 drop-shadow-lg -rotate-12"></i>
                 </div>
 
                 <!-- Book 2 -->
-                <div class="absolute animate-float-reverse transition-all duration-300 hover:scale-110"
-                    style="bottom: 20%; left: 15%;">
+                <div class="absolute animate-float-reverse transition-all duration-300 hover:scale-110 floating-bottom-left">
                     <i class="ph-book-bookmark-fill text-5xl text-brand-maroon/20 drop-shadow-md rotate-6"></i>
                 </div>
 
                 <!-- Extra Decorative Icons -->
-                <div class="absolute animate-float-slow" style="top: 40%; right: 10%; opacity: 0.2;">
+                <div class="absolute animate-float-slow floating-mid-right">
                     <i class="ph-star-fill text-3xl text-brand-maroon"></i>
                 </div>
-                <div class="absolute animate-float-medium" style="bottom: 40%; left: 10%; opacity: 0.2;">
+                <div class="absolute animate-float-medium floating-mid-left">
                     <i class="ph-sparkle-fill text-4xl text-brand-maroon"></i>
                 </div>
             </div>
@@ -262,7 +258,7 @@
                 <i class="ph-graduation-cap-fill text-brand-peach"></i>
                 <span>Degreefi</span>
             </div>
-            <button id="mobile-menu-toggle" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+            <button id="mobile-menu-toggle" class="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Open mobile menu">
                 <i class="ph-list text-2xl"></i>
             </button>
         </header>
@@ -275,7 +271,7 @@
             class="fixed md:static inset-y-0 left-0 w-64 bg-brand-maroon flex flex-col justify-between flex-shrink-0 text-white z-50 transform -translate-x-full md:translate-x-0 hidden-mobile">
             <div class="p-6">
                 <!-- Close Button (Mobile) -->
-                <button id="mobile-menu-close" class="md:hidden absolute top-4 right-4 p-2 text-white/70">
+                <button id="mobile-menu-close" class="md:hidden absolute top-4 right-4 p-2 text-white/70" title="Close mobile menu">
                     <i class="ph-x text-2xl"></i>
                 </button>
 
@@ -417,7 +413,7 @@
                             <div>
                                 <label
                                     class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grade</label>
-                                <select id="course-grade"
+                                <select id="course-grade" title="Select course grade"
                                     class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
                                     <option value="4.0">A</option>
                                     <option value="3.7">A-</option>
@@ -452,8 +448,7 @@
                                                 class="max">61</span> Subjects</div>
                                     </div>
                                     <div class="w-full bg-gray-100 rounded-full h-2 shadow-inner">
-                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500 shadow-sm"
-                                            style="width: 0%"></div>
+                                        <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500 shadow-sm" id="progress-bar-fill"></div>
                                     </div>
                                 </div>
                                 <div
@@ -476,7 +471,7 @@
                                     </div>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="internship-toggle" class="sr-only peer"
+                                    <input type="checkbox" id="internship-toggle" class="sr-only peer" title="Toggle internship requirement"
                                         onchange="StudentDashboard.toggleMilestone('hasInternship')">
                                     <div
                                         class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-maroon">
@@ -499,7 +494,7 @@
                                     </div>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="defense-toggle" class="sr-only peer"
+                                    <input type="checkbox" id="defense-toggle" class="sr-only peer" title="Toggle project defense requirement"
                                         onchange="StudentDashboard.toggleMilestone('hasProject')">
                                     <div
                                         class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-maroon">
@@ -524,7 +519,7 @@
                         <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm">
                             <h2 class="text-lg font-bold text-gray-800 mb-6">Clearance Docs</h2>
                             <form id="file-upload-form" class="space-y-4">
-                                <select id="file-type"
+                                <select id="file-type" title="Select file type"
                                     class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
                                     <option>Financial Clearance</option>
                                     <option>Library Clearance</option>
@@ -646,7 +641,7 @@
                                     <th class="px-6 py-4 w-10">
                                         <input type="checkbox" id="select-all-students"
                                             onclick="AdminDashboard.toggleAll(this.checked)"
-                                            class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer">
+                                            class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer" title="Select all students">
                                     </th>
                                     <th class="px-6 py-4">Student</th>
                                     <th class="px-6 py-4">Reg Number</th>
