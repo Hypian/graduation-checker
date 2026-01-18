@@ -83,19 +83,11 @@ const App = {
     },
 
     checkAuth() {
-        // Simple session verify
-        const sessionEmail = localStorage.getItem('degreefi_session_user');
-        if (sessionEmail) {
-            const normalizedSessionEmail = sessionEmail.toLowerCase().trim();
-            const user = this.data.users.find(u => u.email.toLowerCase().trim() === normalizedSessionEmail);
-            if (user) {
-                this.loginSuccess(user);
-            } else {
-                this.logout();
-            }
-        } else {
-            showView('login-view');
-        }
+        // Session persistence disabled - always start at login screen
+        showView('login-view');
+
+        // Clear any existing session
+        localStorage.removeItem('degreefi_session_user');
     },
 
     register(name, email, password, regNumber) {
@@ -778,13 +770,20 @@ const StudentDashboard = {
 
         [...App.currentUser.courses].reverse().forEach(c => {
             const li = document.createElement('li');
-            li.className = 'flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 text-sm hover:border-brand-maroon/20 transition-all';
+            li.className = 'flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 text-sm hover:border-brand-maroon/20 transition-all group';
             li.innerHTML = `
-                <div>
+                <div class="flex-1">
                     <div class="text-sm font-medium text-gray-800">${c.name}</div>
                     <div class="text-[10px] text-gray-500">Subject ${App.currentUser.courses.indexOf(c) + 1}</div>
                 </div>
-                <div class="text-brand-maroon font-bold">${this.getGradeLetter(c.grade)}</div>
+                <div class="flex items-center gap-2">
+                    <div class="text-brand-maroon font-bold">${this.getGradeLetter(c.grade)}</div>
+                    <button onclick="StudentDashboard.confirmDeleteCourse(${c.id})" 
+                        class="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        title="Delete course">
+                        <i class="ph-trash text-sm"></i>
+                    </button>
+                </div>
             `;
             list.appendChild(li);
         });
@@ -931,6 +930,31 @@ const StudentDashboard = {
         this.updateNotifBadge();
         this.renderNotifications();
         App.showModal('success', 'Inbox Updated', 'All notifications have been marked as read.');
+    },
+
+    confirmDeleteCourse(courseId) {
+        const course = App.currentUser.courses.find(c => c.id === courseId);
+        if (!course) return;
+
+        App.showModal('delete', 'Remove Course?', `Are you sure you want to delete "${course.name}"? This will decrease your subject count.`, () => {
+            this.deleteCourse(courseId);
+        }, {
+            showCancel: true,
+            confirmText: 'Remove'
+        });
+    },
+
+    deleteCourse(courseId) {
+        const idx = App.currentUser.courses.findIndex(c => c.id === courseId);
+        if (idx !== -1) {
+            App.currentUser.courses.splice(idx, 1);
+            App.currentUser.requirements.subjects.current = App.currentUser.courses.length;
+            this.syncUser();
+            this.updateStats();
+            this.renderReqs();
+            this.renderHistory();
+            App.showModal('success', 'Course Removed', 'The course has been deleted from your record.');
+        }
     }
 };
 
