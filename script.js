@@ -560,32 +560,43 @@ const StudentDashboard = {
     },
 
     finalizeUpload(file, type) {
-        const fileEntry = {
-            id: Date.now(),
-            name: `${type} - ${file.name}`,
-            realName: file.name,
-            category: type,
-            extension: file.name.split('.').pop().toLowerCase(),
-            size: (file.size / 1024).toFixed(1) + ' KB',
-            date: new Date().toLocaleDateString()
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fileObj = {
+                id: Date.now(),
+                category: type,
+                name: file.name,
+                data: e.target.result,
+                uploadDate: new Date().toLocaleDateString(),
+                status: 'in-review' // New: pending registrar approval
+            };
+
+            // Remove old file of same category if exists
+            const existingIdx = App.currentUser.files.findIndex(f => f.category === type);
+            if (existingIdx !== -1) {
+                App.currentUser.files.splice(existingIdx, 1);
+            }
+
+            App.currentUser.files.push(fileObj);
+            this.syncUser();
+            this.updateStats();
+            this.renderReqs();
+            this.renderFiles();
+
+            // Reset input
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) fileInput.value = '';
+
+            const uploadText = document.getElementById('drop-zone').querySelector('p:first-of-type');
+            if (uploadText) {
+                uploadText.textContent = 'Tap to upload document';
+                uploadText.classList.add('text-gray-500');
+                uploadText.classList.remove('text-brand-maroon', 'font-bold');
+            }
+
+            App.showModal('success', 'Upload Complete', `Your ${type} document has been uploaded and is now awaiting registrar review.`);
         };
-
-        App.currentUser.files.push(fileEntry);
-        this.syncUser();
-        this.renderFiles();
-
-        // Reset input and feedback text
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) fileInput.value = '';
-
-        const uploadText = document.getElementById('drop-zone').querySelector('p:first-of-type');
-        if (uploadText) {
-            uploadText.textContent = 'Tap to upload document';
-            uploadText.classList.add('text-gray-500');
-            uploadText.classList.remove('text-brand-maroon', 'font-bold');
-        }
-
-        App.showModal('success', 'Upload Successful', `Your "${type}" document has been received and listed in your clearance history.`);
+        reader.readAsDataURL(file);
     },
 
     confirmDeleteFile(fileId, fileName) {
@@ -633,9 +644,9 @@ const StudentDashboard = {
 
         let docScore = 0;
         mandatoryDocs.forEach(doc => {
-            const hasFile = files.some(f => f.category === doc);
-            const isManuallyCleared = reqs.manualClearance && reqs.manualClearance[doc];
-            if (hasFile || isManuallyCleared) docScore++;
+            const file = files.find(f => f.category === doc);
+            const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc]);
+            if (isCleared) docScore++;
         });
 
         const totalCompleted = completedSubjects + docScore;
@@ -692,21 +703,49 @@ const StudentDashboard = {
             ];
 
             mandatoryDocs.forEach(doc => {
-                const hasFile = files.some(f => f.category === doc.id);
+                const file = files.find(f => f.category === doc.id);
                 const isManuallyCleared = reqs.manualClearance && reqs.manualClearance[doc.id];
-                const isDone = hasFile || isManuallyCleared;
+
+                // Three states: pending, in-review, cleared
+                let status, statusLabel, statusColor, bgColor, borderColor, iconColor, icon;
+
+                if (isManuallyCleared || (file && file.status === 'cleared')) {
+                    status = 'cleared';
+                    statusLabel = 'Cleared';
+                    statusColor = 'text-green-600';
+                    bgColor = 'bg-green-50';
+                    borderColor = 'border-green-100';
+                    iconColor = 'bg-green-500 text-white';
+                    icon = 'ph-check-circle-fill text-green-500';
+                } else if (file && file.status === 'in-review') {
+                    status = 'in-review';
+                    statusLabel = 'In Review';
+                    statusColor = 'text-amber-600';
+                    bgColor = 'bg-amber-50';
+                    borderColor = 'border-amber-100';
+                    iconColor = 'bg-amber-500 text-white';
+                    icon = 'ph-hourglass-medium-fill text-amber-500';
+                } else {
+                    status = 'pending';
+                    statusLabel = 'Pending';
+                    statusColor = 'text-gray-500';
+                    bgColor = 'bg-gray-50';
+                    borderColor = 'border-gray-100';
+                    iconColor = 'bg-white text-gray-400 shadow-sm';
+                    icon = 'ph-clock-fill text-gray-400';
+                }
 
                 const div = document.createElement('div');
-                div.className = `flex items-center gap-3 p-3 rounded-xl border transition-all ${isDone ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`;
+                div.className = `flex items-center gap-3 p-3 rounded-xl border transition-all ${bgColor} ${borderColor}`;
                 div.innerHTML = `
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${isDone ? 'bg-green-500 text-white' : 'bg-white text-gray-400 shadow-sm'}">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${iconColor}">
                         <i class="${doc.icon} text-lg"></i>
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold ${isDone ? 'text-green-700' : 'text-gray-500'} uppercase truncate">${doc.label}</p>
+                        <p class="text-[10px] font-bold ${statusColor} uppercase truncate">${doc.label}</p>
                         <div class="flex items-center gap-1.5">
-                            <i class="${isDone ? 'ph-check-circle-fill text-green-500' : 'ph-clock-fill text-amber-500'} text-[10px]"></i>
-                            <span class="text-[8px] font-bold uppercase ${isDone ? 'text-green-600' : 'text-amber-600'}">${isDone ? 'Cleared' : 'Pending'}</span>
+                            <i class="${icon} text-[10px]"></i>
+                            <span class="text-[8px] font-bold uppercase ${statusColor}">${statusLabel}</span>
                         </div>
                     </div>
                 `;
@@ -909,7 +948,9 @@ const AdminDashboard = {
 
             let docScore = 0;
             mandatoryDocs.forEach(doc => {
-                if (files.some(f => f.category === doc) || (reqs.manualClearance && reqs.manualClearance[doc])) docScore++;
+                const file = files.find(f => f.category === doc);
+                const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc]);
+                if (isCleared) docScore++;
             });
 
             const percent = Math.round(((completedSubjects + docScore) / 66) * 100);
@@ -1292,22 +1333,45 @@ const AdminDashboard = {
 
         mandatoryDocs.forEach((doc, idx) => {
             const uploadedFile = student.files.find(f => f.category === doc.id);
-            const hasFile = !!uploadedFile;
             const isManuallyCleared = student.requirements.manualClearance && student.requirements.manualClearance[doc.id];
+
+            // Determine status
+            let status, statusLabel, statusColor, statusBg;
+            if (isManuallyCleared || (uploadedFile && uploadedFile.status === 'cleared')) {
+                status = 'cleared';
+                statusLabel = 'Cleared';
+                statusColor = 'text-green-700';
+                statusBg = 'bg-green-100 border-green-200';
+            } else if (uploadedFile && uploadedFile.status === 'in-review') {
+                status = 'in-review';
+                statusLabel = 'In Review';
+                statusColor = 'text-amber-700';
+                statusBg = 'bg-amber-100 border-amber-200';
+            } else {
+                status = 'pending';
+                statusLabel = 'Pending';
+                statusColor = 'text-gray-500';
+                statusBg = 'bg-gray-100 border-gray-200';
+            }
 
             const div = document.createElement('div');
             div.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100';
             div.innerHTML = `
                 <div class="flex-1">
                     <h4 class="text-sm font-bold text-gray-800">${doc.label}</h4>
-                    <p class="text-[10px] ${hasFile ? 'text-green-600' : 'text-gray-400'} font-medium">
-                        ${hasFile ? 'File Uploaded • Ready for Review' : 'No File Uploaded'}
-                    </p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${statusBg} ${statusColor}">${statusLabel}</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    ${hasFile ? `
+                <div class="flex items-center gap-2">
+                    ${uploadedFile ? `
                         <button onclick="AdminDashboard.viewStudentFile('${doc.id}')" class="px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all">
                             <i class="ph-eye"></i> View
+                        </button>
+                    ` : ''}
+                    ${status === 'in-review' ? `
+                        <button onclick="AdminDashboard.approveDocument('${doc.id}')" class="px-3 py-1.5 bg-green-500 text-white text-[10px] font-bold rounded-lg hover:bg-green-600 transition-all">
+                            <i class="ph-check-circle"></i> Approve
                         </button>
                     ` : ''}
                     <div class="flex items-center gap-2">
@@ -1379,6 +1443,22 @@ const AdminDashboard = {
 
         App.saveData();
         this.updateReviewStats();
+        this.renderReviewClearance();
+    },
+
+    approveDocument(category) {
+        const file = this.currentReviewUser.files.find(f => f.category === category);
+        if (!file) return;
+
+        file.status = 'cleared';
+        App.saveData();
+        this.updateReviewStats();
+        this.renderReviewClearance();
+
+        const message = `Document Approved: Your "${category}" has been reviewed and approved by the registrar. This now counts toward your graduation requirements.`;
+        this.dispatchNotification(this.currentReviewUser, 'Clearance Approved', message, false);
+
+        App.showModal('success', 'Document Approved', `${category} has been approved and marked as cleared.`);
     },
 
     sendCustomMessage() {
