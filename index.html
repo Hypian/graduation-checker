@@ -293,7 +293,7 @@
                         <span id="notif-badge"
                             class="hidden bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm">0</span>
                     </a>
-                    <a href="#"
+                    <a href="#" onclick="StudentDashboard.switchTab('courses')" id="nav-courses"
                         class="nav-link nav-student flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
                         <i class="ph-books text-lg"></i> Courses
                     </a>
@@ -404,23 +404,20 @@
                         <h2 class="text-lg font-bold text-gray-800 mb-6">Add Course</h2>
                         <form id="course-form" class="space-y-4">
                             <div>
-                                <label
+                                <label for="course-name"
                                     class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Course
                                     Name</label>
-                                <input type="text" id="course-name" required placeholder="e.g. Intro to Algorithms"
-                                    class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none text-sm uppercase">
+                                <select id="course-name" required class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none text-sm uppercase cursor-pointer">
+                                    <option value="" disabled selected>Select a Course</option>
+                                    <!-- Populated by JS -->
+                                </select>
                             </div>
                             <div>
-                                <label
+                                <label for="course-grade"
                                     class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grade</label>
-                                <select id="course-grade" title="Select course grade"
-                                    class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon outline-none text-sm cursor-pointer">
+                                <select id="course-grade" title="Select course grade" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg p-2.5 focus:border-brand-maroon focus:ring-1 focus:ring-brand-maroon outline-none text-sm uppercase cursor-pointer">
                                     <option value="4.0">A</option>
-                                    <option value="3.7">A-</option>
-                                    <option value="3.3">B+</option>
                                     <option value="3.0">B</option>
-                                    <option value="2.7">B-</option>
-                                    <option value="2.3">C+</option>
                                     <option value="2.0">C</option>
                                     <option value="1.0">D</option>
                                     <option value="0.0">F</option>
@@ -572,6 +569,32 @@
                             </ul>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+
+            <!-- COURSES VIEW (SMART) -->
+            <div id="courses-view" class="dashboard-content hidden max-w-5xl mx-auto space-y-6 md:space-y-8">
+                <header class="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-gray-100 pb-6">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">My Courses</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Performance analysis and GPA impact statements.</p>
+                    </div>
+                    <div class="bg-brand-maroon/5 p-4 rounded-2xl flex items-center gap-4 border border-brand-maroon/10">
+                         <div class="w-10 h-10 rounded-full bg-brand-maroon text-white flex items-center justify-center">
+                            <i class="ph-trend-up-bold text-xl"></i>
+                         </div>
+                         <div>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Current GPA</p>
+                            <p id="courses-view-gpa" class="text-2xl font-bold text-brand-maroon leading-none">0.0</p>
+                         </div>
+                    </div>
+                </header>
+
+                <div id="smart-courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated via JS -->
+                    <div class="col-span-full text-center py-12 text-gray-400 italic bg-white rounded-3xl border border-dashed border-gray-200">
+                        No courses added yet. Go to Dashboard to add your first course.
                     </div>
                 </div>
             </div>

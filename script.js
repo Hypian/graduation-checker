@@ -2,6 +2,30 @@
 // APP STATE & CONFIGURATION
 // ==========================================
 const App = {
+    // BBICT Course List
+    AVAILABLE_COURSES: [
+        "Introduction to Computing",
+        "Fundamentals of Programming",
+        "Digital Logic Design",
+        "Discrete Structures",
+        "Object Oriented Programming",
+        "Data Structures and Algorithms",
+        "Database Management Systems",
+        "Computer Organization & Architecture",
+        "Operating Systems",
+        "Software Engineering",
+        "Computer Networks",
+        "Web Technologies",
+        "Artificial Intelligence",
+        "Information Security",
+        "Mobile Application Development",
+        "Human Computer Interaction",
+        "Cloud Computing",
+        "Capstone Project I",
+        "Capstone Project II",
+        "Professional Ethics in IT"
+    ],
+
     currentUser: null,
     data: {
         users: [
@@ -68,8 +92,8 @@ const App = {
                     };
                 }
 
-                // Ensure current subject count is in sync
-                u.requirements.subjects.current = u.courses.length;
+                // Ensure current subject count is in sync (excluding Fails)
+                u.requirements.subjects.current = u.courses.filter(c => c.grade > 0).length;
             });
             this.saveData();
         } else {
@@ -83,11 +107,17 @@ const App = {
     },
 
     checkAuth() {
-        // Session persistence disabled - always start at login screen
-        showView('login-view');
+        const sessionEmail = localStorage.getItem('degreefi_session_user');
+        if (sessionEmail) {
+            const user = this.data.users.find(u => u.email === sessionEmail);
+            if (user) {
+                this.loginSuccess(user);
+                return;
+            }
+        }
 
-        // Clear any existing session
-        localStorage.removeItem('degreefi_session_user');
+        // If no session or invalid user, show login
+        showView('login-view');
     },
 
     register(name, email, password, regNumber) {
@@ -281,7 +311,7 @@ const App = {
             const studentLinks = document.querySelectorAll('.nav-student');
             if (user.role === 'student') {
                 studentLinks.forEach(el => el.classList.remove('hidden'));
-                StudentDashboard.switchTab('dashboard'); // Start on dashboard
+                        StudentDashboard.switchTab('dashboard'); // Start on dashboard
                 StudentDashboard.updateNotifBadge();
             } else {
                 studentLinks.forEach(el => el.classList.add('hidden'));
@@ -425,6 +455,124 @@ const StudentDashboard = {
         if (initialsEl) initialsEl.textContent = App.currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     },
 
+    switchTab(tabName) {
+        // Hide all dashboard contents
+        document.querySelectorAll('.dashboard-content').forEach(el => el.classList.add('hidden'));
+        
+        // Reset Nav Links
+        document.querySelectorAll('.nav-link').forEach(el => {
+            el.classList.remove('bg-white/10', 'text-[#FFE8D6]');
+            el.classList.add('text-white/70', 'hover:text-white', 'hover:bg-white/5');
+        });
+
+        // Activate Selected
+        const targetView = document.getElementById(`${tabName}-view`);
+        if (targetView) targetView.classList.remove('hidden');
+
+        const safeTabName = tabName === 'courses' ? 'courses' : tabName; // Handle edge cases if needed
+        const activeNav = document.getElementById(`nav-${safeTabName}`) || document.getElementById('nav-dashboard'); // Default fallback
+        
+        if (activeNav) {
+            activeNav.classList.remove('text-white/70', 'hover:text-white', 'hover:bg-white/5');
+            activeNav.classList.add('bg-white/10', 'text-[#FFE8D6]');
+        }
+
+        // Specific Render Logics
+        if (tabName === 'courses') {
+            this.renderCourses();
+        } else if (tabName === 'dashboard') {
+            this.render();
+        }
+    },
+
+    getSmartRemark(grade) {
+        if (grade >= 4.0) return { 
+            text: "Excellent! This grade maximizes your GPA potential.", 
+            color: "text-green-600", bg: "bg-green-50", icon: "ph-trend-up-bold" 
+        };
+        if (grade >= 3.5) return { 
+            text: "Great job. Strong contribution to academic standing.", 
+            color: "text-emerald-600", bg: "bg-emerald-50", icon: "ph-check-circle-bold" 
+        };
+        if (grade >= 3.0) return { 
+            text: "Solid performance. Keeps you on track for graduation.", 
+            color: "text-blue-600", bg: "bg-blue-50", icon: "ph-minus-circle-bold" 
+        };
+        if (grade >= 2.0) return { 
+            text: "Passing grade. Consider reviewing core concepts for future courses.", 
+            color: "text-amber-600", bg: "bg-amber-50", icon: "ph-warning-bold" 
+        };
+        if (grade >= 1.0) return { 
+            text: "Barely passing. This negatively impacts your GPA significantly.", 
+            color: "text-orange-600", bg: "bg-orange-50", icon: "ph-warning-octagon-bold" 
+        };
+        return { 
+            text: "Critical: This grade requires retaking the course to graduate.", 
+            color: "text-red-600", bg: "bg-red-50", icon: "ph-x-circle-bold" 
+        };
+    },
+
+    renderCourses() {
+        if (!App.currentUser) return;
+
+        // Force refresh from main data to Ensure sync
+        const freshUser = App.data.users.find(u => u.email === App.currentUser.email);
+        if (freshUser) App.currentUser = freshUser;
+
+        const listEl = document.getElementById('smart-courses-list');
+        const gpaEl = document.getElementById('courses-view-gpa');
+        const courses = App.currentUser.courses || [];
+        
+        // DEBUG: Visible confirmation
+        // alert(`Debug: Found ${courses.length} courses for ${App.currentUser.email}`);
+
+        // Calculate GPA
+        const totalPoints = courses.reduce((sum, c) => sum + (c.grade), 0);
+        const gpa = courses.length > 0 ? (totalPoints / courses.length).toFixed(2) : "0.00";
+        if (gpaEl) gpaEl.textContent = gpa;
+
+        console.log('[DEBUG] Rendering Courses:', { courses, listEl, gpaEl });
+
+        if (listEl) {
+            if (courses.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400 italic bg-white rounded-3xl border border-dashed border-gray-200">
+                        No courses added yet. Go to Dashboard to add your first course.
+                        <br><span class="text-xs text-red-400">(Debug: Array is empty)</span>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = courses.map(course => {
+                const remark = this.getSmartRemark(course.grade);
+                return `
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">${course.name}</h3>
+                            <p class="text-xs text-gray-400 font-mono">${course.date || 'No Date'}</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center font-bold text-xl text-gray-700 group-hover:bg-brand-maroon group-hover:text-white transition-colors">
+                            ${course.grade.toFixed(1)}
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 p-3 rounded-xl ${remark.bg}">
+                        <i class="${remark.icon} ${remark.color} text-lg mt-0.5"></i>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest ${remark.color} mb-0.5">Analysis</p>
+                            <p class="text-xs ${remark.color} font-medium leading-relaxed">
+                                ${remark.text}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+    },
+
     bindEvents() {
         const courseForm = document.getElementById('course-form');
         // Prevent double binding
@@ -433,6 +581,8 @@ const StudentDashboard = {
             e.preventDefault();
             this.addCourse();
         });
+
+        this.populateCourseDropdown();
 
         const fileForm = document.getElementById('file-upload-form');
         fileForm.replaceWith(fileForm.cloneNode(true));
@@ -457,6 +607,23 @@ const StudentDashboard = {
                     uploadText.classList.add('text-brand-maroon', 'font-bold');
                 }
             }
+        });
+    },
+
+    populateCourseDropdown() {
+        const select = document.getElementById('course-name');
+        if (!select) return;
+
+        // Clear existing options except the placeholder
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+
+        App.AVAILABLE_COURSES.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            select.appendChild(option);
         });
     },
 
@@ -491,7 +658,11 @@ const StudentDashboard = {
 
         // Mutate current user
         App.currentUser.courses.push(course);
-        App.currentUser.requirements.subjects.current += 1;
+        
+        // Only increment if passing grade (> 0.0)
+        if (course.grade > 0) {
+            App.currentUser.requirements.subjects.current += 1;
+        }
 
         this.syncUser();
         this.render();
@@ -837,11 +1008,7 @@ const StudentDashboard = {
 
     getGradeLetter(points) {
         if (points >= 4.0) return 'A';
-        if (points >= 3.7) return 'A-';
-        if (points >= 3.3) return 'B+';
         if (points >= 3.0) return 'B';
-        if (points >= 2.7) return 'B-';
-        if (points >= 2.3) return 'C+';
         if (points >= 2.0) return 'C';
         if (points >= 1.0) return 'D';
         return 'F';
@@ -956,8 +1123,16 @@ const StudentDashboard = {
     deleteCourse(courseId) {
         const idx = App.currentUser.courses.findIndex(c => c.id === courseId);
         if (idx !== -1) {
+            const course = App.currentUser.courses[idx];
             App.currentUser.courses.splice(idx, 1);
-            App.currentUser.requirements.subjects.current = App.currentUser.courses.length;
+            
+            // Only decrement if it was a passing grade
+            if (course.grade > 0) {
+                App.currentUser.requirements.subjects.current = Math.max(0, App.currentUser.requirements.subjects.current - 1);
+            }
+            // Recalculate to be safe (robustness)
+            App.currentUser.requirements.subjects.current = App.currentUser.courses.filter(c => c.grade > 0).length;
+
             this.syncUser();
             this.updateStats();
             this.renderReqs();
@@ -1321,11 +1496,7 @@ const AdminDashboard = {
                 <div class="flex items-center gap-4">
                     <select onchange="AdminDashboard.updateReviewGrade(${idx}, this.value)" class="bg-white border-0 text-sm font-bold text-brand-maroon outline-none cursor-pointer p-1 rounded">
                         <option value="4.0" ${c.grade === 4.0 ? 'selected' : ''}>A</option>
-                        <option value="3.7" ${c.grade === 3.7 ? 'selected' : ''}>A-</option>
-                        <option value="3.3" ${c.grade === 3.3 ? 'selected' : ''}>B+</option>
                         <option value="3.0" ${c.grade === 3.0 ? 'selected' : ''}>B</option>
-                        <option value="2.7" ${c.grade === 2.7 ? 'selected' : ''}>B-</option>
-                        <option value="2.3" ${c.grade === 2.3 ? 'selected' : ''}>C+</option>
                         <option value="2.0" ${c.grade === 2.0 ? 'selected' : ''}>C</option>
                         <option value="1.0" ${c.grade === 1.0 ? 'selected' : ''}>D</option>
                         <option value="0.0" ${c.grade === 0.0 ? 'selected' : ''}>F</option>
@@ -1342,11 +1513,22 @@ const AdminDashboard = {
     updateReviewGrade(idx, grade) {
         const course = this.currentReviewUser.courses[idx];
         const oldGrade = course.grade;
-        course.grade = parseFloat(grade);
+        const newGrade = parseFloat(grade);
+        course.grade = newGrade;
+        
+        // Update subject count if changing between Pass/Fail status
+        // Pass -> Fail : Decrement
+        if (oldGrade > 0 && newGrade === 0) {
+            this.currentReviewUser.requirements.subjects.current = Math.max(0, this.currentReviewUser.requirements.subjects.current - 1);
+        }
+        // Fail -> Pass : Increment
+        else if (oldGrade === 0 && newGrade > 0) {
+            this.currentReviewUser.requirements.subjects.current += 1;
+        }
 
-        const gradeMap = { "4": "A", "4.0": "A", "3.7": "A-", "3.3": "B+", "3": "B", "3.0": "B", "2.7": "B-", "2.3": "C+", "2": "C", "2.0": "C", "1": "D", "1.0": "D", "0": "F", "0.0": "F" };
+        const gradeMap = { "4": "A", "4.0": "A", "3": "B", "3.0": "B", "2": "C", "2.0": "C", "1": "D", "1.0": "D", "0": "F", "0.0": "F" };
         const oldLetter = gradeMap[oldGrade.toString()] || oldGrade;
-        const newLetter = gradeMap[parseFloat(grade).toString()] || grade;
+        const newLetter = gradeMap[newGrade.toString()] || grade;
 
         if (oldGrade !== parseFloat(grade)) {
             const message = `Academic Update: Your grade for "${course.name}" has been updated from ${oldLetter} to ${newLetter} by the registrar.`;
@@ -1358,8 +1540,16 @@ const AdminDashboard = {
     },
 
     removeReviewSubject(idx) {
+        const course = this.currentReviewUser.courses[idx];
         this.currentReviewUser.courses.splice(idx, 1);
-        this.currentReviewUser.requirements.subjects.current = this.currentReviewUser.courses.length;
+        
+        // Only update count if it was a passing grade
+        if (course.grade > 0) {
+            this.currentReviewUser.requirements.subjects.current = Math.max(0, this.currentReviewUser.requirements.subjects.current - 1);
+        }
+        // Safety re-calc
+        this.currentReviewUser.requirements.subjects.current = this.currentReviewUser.courses.filter(c => c.grade > 0).length;
+        
         App.saveData();
         this.renderReviewSubjects();
         this.updateReviewStats();
@@ -1537,6 +1727,11 @@ const AdminDashboard = {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
+    // Expose to global scope for HTML inline events
+    window.App = App;
+    window.StudentDashboard = StudentDashboard;
+    window.AdminDashboard = AdminDashboard;
+
     App.init();
     StudentDashboard.bindEvents();
 });
