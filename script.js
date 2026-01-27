@@ -120,7 +120,7 @@ const App = {
         showView('login-view');
     },
 
-    register(name, email, password, regNumber) {
+    register(name, email, password, regNumber, phone) {
         const normalizedEmail = email.toLowerCase().trim();
         const normalizedName = name.toLowerCase().trim();
         const normalizedReg = regNumber.toUpperCase().trim();
@@ -142,12 +142,19 @@ const App = {
             return;
         }
 
+        // Validate Phone Number
+        if (!phone || !/^07\d{8}$/.test(phone)) {
+             this.showModal('warning', 'Invalid Phone Number', 'Phone number must be exactly 10 digits and start with "07" (e.g., 0712345678).');
+             return;
+        }
+
         const newUser = {
             email: normalizedEmail,
             password,
             role: 'student',
             name,
             regNumber: normalizedReg,
+            phone: phone, 
             courses: [],
             files: [],
             requirements: {
@@ -386,7 +393,8 @@ const App = {
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
             const regNumber = document.getElementById('reg-number').value;
-            this.register(name, email, password, regNumber);
+            const phone = document.getElementById('reg-phone').value;
+            this.register(name, email, password, regNumber, phone);
         });
 
         // Mobile Sidebar Events
@@ -441,11 +449,19 @@ function showView(viewId) {
 const StudentDashboard = {
     render() {
         if (!App.currentUser) return;
+
+        // Ensure subject counts are always derived from the courses list to prevent desync
+        App.currentUser.requirements.subjects.current = App.currentUser.courses.filter(c => c.grade > 0).length;
+
         this.updateStats();
         this.renderHistory();
         this.renderReqs();
         this.renderFiles();
         this.renderProfile();
+        
+        // Also update sub-views to ensure data matches across all tabs immediately
+        this.renderRequirements();
+        this.renderCourses(); 
     },
 
     renderProfile() {
@@ -453,6 +469,16 @@ const StudentDashboard = {
         const initialsEl = document.getElementById('student-badge-initials');
         if (regEl) regEl.textContent = App.currentUser.regNumber || 'N/A';
         if (initialsEl) initialsEl.textContent = App.currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        const sidePhoneEl = document.getElementById('user-phone');
+        if (sidePhoneEl) {
+             if (App.currentUser.phone) {
+                 sidePhoneEl.textContent = App.currentUser.phone;
+                 sidePhoneEl.classList.remove('hidden');
+             } else {
+                 sidePhoneEl.classList.add('hidden');
+             }
+        }
     },
 
     switchTab(tabName) {
@@ -480,8 +506,118 @@ const StudentDashboard = {
         // Specific Render Logics
         if (tabName === 'courses') {
             this.renderCourses();
+        } else if (tabName === 'requirements') {
+            this.renderRequirements();
         } else if (tabName === 'dashboard') {
             this.render();
+        }
+    },
+
+    renderRequirements() {
+        if (!App.currentUser) return;
+        
+        const reqs = App.currentUser.requirements;
+        const files = App.currentUser.files || [];
+        const courses = App.currentUser.courses;
+
+        // 1. Graduation Status Card
+        const completedSubjects = Math.min(61, reqs.subjects.current);
+        const mandatoryDocs = [
+            "Financial Clearance",
+            "Library Clearance",
+            "Transcript",
+            "Academic Internship",
+            "Project Defense"
+        ];
+
+        let docScore = 0;
+        mandatoryDocs.forEach(doc => {
+            if (files.some(f => f.category === doc && f.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc])) docScore++;
+        });
+
+        // GPA Check
+        const totalPoints = courses.reduce((sum, c) => sum + (c.grade), 0);
+        const gpa = courses.length > 0 ? (totalPoints / courses.length) : 0;
+        const gpaPass = gpa >= 2.0;
+        
+        const totalCompleted = completedSubjects + docScore;
+        const totalPossible = 66;
+        const percent = Math.round((totalCompleted / totalPossible) * 100);
+        const isEligible = percent >= 100 && gpaPass;
+
+        // UI Update: Status Badge
+        const statusIcon = document.getElementById('grad-status-icon');
+        const statusText = document.getElementById('grad-status-text');
+        const statusContainer = document.getElementById('graduation-status-badge');
+
+        if (isEligible) {
+            statusIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-green-500 text-white shadow-lg shadow-green-200';
+            statusIcon.innerHTML = '<i class="ph-seal-check-fill text-xl"></i>';
+            statusText.textContent = 'Eligible';
+            statusText.className = 'text-sm font-bold text-green-600 uppercase';
+        } else {
+            statusIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-brand-maroon text-white';
+            statusIcon.innerHTML = '<i class="ph-lock-fill text-xl"></i>';
+            statusText.textContent = 'Not Eligible';
+            statusText.className = 'text-sm font-bold text-gray-800 uppercase';
+        }
+
+        // 2. Academic Stats
+        document.getElementById('req-sub-count').textContent = completedSubjects;
+        document.getElementById('req-sub-percent').textContent = `${Math.round((completedSubjects / 61) * 100)}%`;
+        document.getElementById('req-sub-bar').style.width = `${(completedSubjects / 61) * 100}%`;
+        document.getElementById('req-gpa').textContent = gpa.toFixed(2);
+        document.getElementById('req-gpa').className = `text-2xl font-bold ${gpaPass ? 'text-green-600' : 'text-red-500'}`;
+
+        // 3. Detailed Checklist
+        const checklist = document.getElementById('detailed-checklist');
+        if (checklist) {
+            checklist.innerHTML = '';
+            const docItems = [
+                { id: 'Financial Clearance', label: 'Financial Clearance', desc: 'Tuition and fees balance check' },
+                { id: 'Library Clearance', label: 'Library Clearance', desc: 'Returned books and overdue fines' },
+                { id: 'Transcript', label: 'Submission of Transcript', desc: 'Verified academic records' },
+                { id: 'Academic Internship', label: 'Internship Completion', desc: 'Work placement certificate' },
+                { id: 'Project Defense', label: 'Final Project Defense', desc: 'Research presentation approval' }
+            ];
+
+            docItems.forEach(item => {
+                const file = files.find(f => f.category === item.id);
+                const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[item.id]);
+                const isInReview = file && file.status === 'in-review';
+
+                let statusLabel, statusColor, bgColor, icon;
+                if (isCleared) {
+                    statusLabel = 'Verified';
+                    statusColor = 'text-green-600';
+                    bgColor = 'bg-green-50/50 border-green-100';
+                    icon = 'ph-check-circle-fill';
+                } else if (isInReview) {
+                    statusLabel = 'Pending Review';
+                    statusColor = 'text-amber-600';
+                    bgColor = 'bg-amber-50/50 border-amber-100';
+                    icon = 'ph-hourglass-medium-fill';
+                } else {
+                    statusLabel = 'Action Required';
+                    statusColor = 'text-gray-400';
+                    bgColor = 'bg-white border-gray-100';
+                    icon = 'ph-circle';
+                }
+
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-4 rounded-2xl border transition-all ${bgColor}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <i class="${icon} text-2xl ${statusColor}"></i>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">${item.label}</h4>
+                            <p class="text-[10px] text-gray-500 font-medium">${item.desc}</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest ${statusColor}">${statusLabel}</span>
+                `;
+                checklist.appendChild(div);
+            });
         }
     },
 
@@ -519,57 +655,69 @@ const StudentDashboard = {
         const freshUser = App.data.users.find(u => u.email === App.currentUser.email);
         if (freshUser) App.currentUser = freshUser;
 
-        const listEl = document.getElementById('smart-courses-list');
         const gpaEl = document.getElementById('courses-view-gpa');
         const courses = App.currentUser.courses || [];
         
-        // DEBUG: Visible confirmation
-        // alert(`Debug: Found ${courses.length} courses for ${App.currentUser.email}`);
-
         // Calculate GPA
         const totalPoints = courses.reduce((sum, c) => sum + (c.grade), 0);
         const gpa = courses.length > 0 ? (totalPoints / courses.length).toFixed(2) : "0.00";
         if (gpaEl) gpaEl.textContent = gpa;
 
-        console.log('[DEBUG] Rendering Courses:', { courses, listEl, gpaEl });
+        // Render Full Curriculum List
+        this.renderCurriculum();
+    },
 
-        if (listEl) {
-            if (courses.length === 0) {
-                listEl.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-gray-400 italic bg-white rounded-3xl border border-dashed border-gray-200">
-                        No courses added yet. Go to Dashboard to add your first course.
-                        <br><span class="text-xs text-red-400">(Debug: Array is empty)</span>
-                    </div>
-                `;
-                return;
+    renderCurriculum() {
+        const currList = document.getElementById('curriculum-list');
+        if (!currList) return;
+
+        try {
+            // Check for necessary data
+            if (!App.AVAILABLE_COURSES || !Array.isArray(App.AVAILABLE_COURSES)) {
+                throw new Error("Curriculum data (AVAILABLE_COURSES) is missing or invalid.");
             }
 
-            listEl.innerHTML = courses.map(course => {
-                const remark = this.getSmartRemark(course.grade);
-                return `
-                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-lg">${course.name}</h3>
-                            <p class="text-xs text-gray-400 font-mono">${course.date || 'No Date'}</p>
+            const userCourses = (App.currentUser && App.currentUser.courses) ? App.currentUser.courses : [];
+            let html = '';
+
+            for (let i = 0; i < App.AVAILABLE_COURSES.length; i++) {
+                const courseName = App.AVAILABLE_COURSES[i];
+                const normalizedName = courseName.toUpperCase();
+                
+                // Optimized check
+                const userHas = userCourses.some(c => c.name && c.name.toUpperCase() === normalizedName);
+                
+                const statusIcon = userHas 
+                    ? '<i class="ph-check-circle-fill text-green-500 text-xl"></i>' 
+                    : '<div class="w-2 h-2 rounded-full bg-gray-200"></div>';
+                
+                const cardBg = userHas 
+                    ? 'bg-green-50/50 border-green-100 ring-1 ring-green-200' 
+                    : 'bg-white border-gray-100 hover:border-gray-200';
+
+                html += `
+                    <div class="${cardBg} p-4 rounded-xl border flex items-center justify-between gap-3 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-maroon/5 text-brand-maroon flex items-center justify-center font-bold text-xs shrink-0">
+                                ${i + 1}
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 line-clamp-2 leading-tight">${courseName}</span>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center font-bold text-xl text-gray-700 group-hover:bg-brand-maroon group-hover:text-white transition-colors">
-                            ${course.grade.toFixed(1)}
-                        </div>
+                        ${statusIcon}
                     </div>
-                    
-                    <div class="flex items-start gap-3 p-3 rounded-xl ${remark.bg}">
-                        <i class="${remark.icon} ${remark.color} text-lg mt-0.5"></i>
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest ${remark.color} mb-0.5">Analysis</p>
-                            <p class="text-xs ${remark.color} font-medium leading-relaxed">
-                                ${remark.text}
-                            </p>
-                        </div>
-                    </div>
-                </div>
                 `;
-            }).join('');
+            }
+
+            currList.innerHTML = html || '<p class="col-span-full text-center py-8 text-gray-400">No courses available in curriculum.</p>';
+            
+        } catch (err) {
+            console.error("Critical Error in renderCurriculum:", err);
+            currList.innerHTML = `
+                <div class="col-span-full p-6 bg-red-50 border border-red-100 rounded-2xl text-center">
+                    <p class="text-red-600 font-bold mb-2">Display Error</p>
+                    <p class="text-red-500 text-xs">${err.message}</p>
+                </div>
+            `;
         }
     },
 

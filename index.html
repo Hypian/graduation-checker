@@ -84,14 +84,14 @@
     <!-- LOGIN VIEW              -->
     <!-- ======================= -->
     <section id="login-view"
-        class="view fixed inset-0 z-50 flex flex-col md:flex-row bg-white overflow-y-auto md:overflow-hidden">
+        class="view fixed inset-0 z-50 flex flex-col md:flex-row bg-white overflow-y-auto md:overflow-hidden dark:bg-brand-dark-bg">
 
         <!-- Left Side: Hero Image (Hidden on small mobile) -->
         <div
-            class="hidden md:flex md:w-1/2 bg-[#FFE8D6] items-center justify-center flex-col p-12 relative overflow-hidden min-h-[400px]">
+            class="hidden md:flex md:w-1/2 bg-[#FFE8D6] items-center justify-center flex-col p-12 relative overflow-hidden min-h-[400px] dark:bg-[#2d1b24]">
             <!-- Decorative blobs -->
-            <div class="absolute top-10 left-10 w-24 h-24 bg-[#FFD4B5] rounded-full blur-2xl opacity-60"></div>
-            <div class="absolute bottom-20 right-20 w-40 h-40 bg-[#D4A5A5] rounded-full blur-3xl opacity-40"></div>
+            <div class="absolute top-10 left-10 w-24 h-24 bg-[#FFD4B5] rounded-full blur-2xl opacity-60 dark:bg-[#7E2255] dark:opacity-30"></div>
+            <div class="absolute bottom-20 right-20 w-40 h-40 bg-[#D4A5A5] rounded-full blur-3xl opacity-40 dark:bg-[#7E2255] dark:opacity-20"></div>
 
             <!-- Floating Icons Container -->
             <div class="relative w-full h-80 flex items-center justify-center z-10">
@@ -129,15 +129,15 @@
 
         <!-- Right Side: Form -->
         <div
-            class="w-full md:w-1/2 bg-white flex items-center justify-center p-6 md:p-8 min-h-screen md:min-h-0 relative">
+            class="w-full md:w-1/2 bg-white flex items-center justify-center p-6 md:p-8 min-h-screen md:min-h-0 relative dark:bg-brand-dark-card">
             <div class="w-full max-w-sm">
 
                 <div class="mb-10 text-center flex flex-col items-center">
-                    <div class="text-5xl font-bold text-brand-maroon flex flex-col items-center gap-2 mb-6">
-                        <i class="ph-graduation-cap-fill text-6xl"></i>
+                    <div class="text-5xl font-bold text-brand-maroon flex flex-col items-center gap-2 mb-6 dark:text-gray-200">
+                        <i class="ph-graduation-cap-fill text-6xl text-brand-maroon dark:text-brand-peach"></i>
                         <span>Degreefi</span>
                     </div>
-                    <h1 class="text-2xl font-bold text-gray-900">Login to your Account</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-200">Login to your Account</h1>
 
                 </div>
 
@@ -218,10 +218,15 @@
                         class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Email
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide dark:text-gray-300">Email
                         Address</label>
                     <input type="email" id="reg-email" required placeholder="john@university.edu"
-                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50">
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50 dark:bg-brand-dark-card dark:border-brand-maroon/30 dark:text-gray-200">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide dark:text-gray-300">Phone Number</label>
+                    <input type="tel" id="reg-phone" required placeholder="0770123456" maxlength="10" pattern="07\d{8}" title="Must start with 07 and be 10 digits"
+                        class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:border-brand-maroon outline-none bg-gray-50 dark:bg-brand-dark-card dark:border-brand-maroon/30 dark:text-gray-200">
                 </div>
                 <div>
                     <label class="block text-gray-700 text-xs font-bold mb-1 uppercase tracking-wide">Registration
@@ -297,7 +302,7 @@
                         class="nav-link nav-student flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
                         <i class="ph-books text-lg"></i> Courses
                     </a>
-                    <a href="#"
+                    <a href="#" onclick="StudentDashboard.switchTab('requirements')" id="nav-requirements"
                         class="nav-link nav-student flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
                         <i class="ph-chart-pie-slice text-lg"></i> Requirements
                     </a>
@@ -317,6 +322,7 @@
                         <p id="user-name" class="text-sm font-semibold text-white truncate">User Name</p>
                         <div class="flex flex-col">
                             <p id="user-reg" class="text-[10px] text-white/80 font-mono hidden">REG-000</p>
+                            <p id="user-phone" class="text-[10px] text-white/80 font-mono hidden">07...</p>
                             <p id="user-role" class="text-xs text-white/60 capitalize">Role</p>
                         </div>
                     </div>
@@ -325,7 +331,7 @@
         </nav>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 bg-[#FFF5EB] overflow-y-auto p-4 md:p-8 relative">
+        <main class="flex-1 bg-[#FFF5EB] overflow-y-auto p-4 md:p-8 relative dark:bg-brand-dark-bg transition-colors duration-300">
 
             <!-- STUDENT DASHBOARD -->
             <div id="dashboard-view" class="dashboard-content hidden max-w-6xl mx-auto space-y-6 md:space-y-8">
@@ -351,9 +357,9 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     <!-- Progress Card -->
-                    <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm lg:col-span-2">
+                    <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-2xl shadow-sm lg:col-span-2 dark:bg-brand-dark-card dark:border-brand-maroon/20">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-lg font-bold text-gray-800">Overall Progress</h2>
+                            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">Overall Progress</h2>
                             <span id="status-badge"
                                 class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold bg-gray-100 text-gray-600">In
                                 Progress</span>
@@ -573,12 +579,92 @@
                 </div>
             </div>
 
+            <!-- REQUIREMENTS VIEW -->
+            <div id="requirements-view" class="dashboard-content hidden max-w-6xl mx-auto space-y-6 md:space-y-8">
+                <header class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Graduation Checklist</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Comprehensive breakdown of your eligibility status.</p>
+                    </div>
+                    <div id="graduation-status-badge" class="px-6 py-3 rounded-2xl flex items-center gap-3 bg-white shadow-sm border border-gray-100">
+                        <div id="grad-status-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white">
+                            <i class="ph-lock-fill text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-none mb-1">Graduation Status</p>
+                            <p id="grad-status-text" class="text-sm font-bold text-gray-800 uppercase">Not Eligible</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Academic Performance Details -->
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 space-y-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-maroon/5 text-brand-maroon flex items-center justify-center">
+                                <i class="ph-graduation-cap text-2xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">Academic Standing</h2>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="p-6 bg-brand-maroon/[0.02] rounded-3xl border border-brand-maroon/5">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Subject Credits Progress</p>
+                                <div class="flex items-end justify-between mb-3">
+                                    <div class="flex items-baseline gap-1">
+                                        <span id="req-sub-count" class="text-4xl font-bold text-brand-maroon">0</span>
+                                        <span class="text-gray-400 font-bold">/ 61</span>
+                                    </div>
+                                    <span id="req-sub-percent" class="text-sm font-bold text-brand-maroon">0%</span>
+                                </div>
+                                <div class="w-full bg-white h-3 rounded-full overflow-hidden border border-brand-maroon/5 shadow-inner">
+                                    <div id="req-sub-bar" class="h-full bg-brand-maroon rounded-full transition-all duration-1000"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Current GPA</p>
+                                    <p id="req-gpa" class="text-2xl font-bold text-gray-800">0.00</p>
+                                </div>
+                                <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Minimum GPA</p>
+                                    <p class="text-2xl font-bold text-gray-800">2.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mandatory Clearance Checklist -->
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 space-y-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-maroon/5 text-brand-maroon flex items-center justify-center">
+                                <i class="ph-clipboard-check text-2xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">Mandatory Clearances</h2>
+                        </div>
+
+                        <div id="detailed-checklist" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div class="mt-8 p-6 bg-amber-50 rounded-3xl border border-amber-100 flex gap-4">
+                            <i class="ph-info-fill text-2xl text-amber-500 flex-shrink-0"></i>
+                            <p class="text-xs text-amber-900 leading-relaxed font-medium">
+                                <span class="font-bold block mb-1">Submission Policy:</span>
+                                All documents must be verified by the registrar's office. Once a document is uploaded, it will remain in "Review" status until an administrator clears it.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- COURSES VIEW (SMART) -->
             <div id="courses-view" class="dashboard-content hidden max-w-5xl mx-auto space-y-6 md:space-y-8">
                 <header class="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-gray-100 pb-6">
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">My Courses</h1>
-                        <p class="text-gray-500 text-sm md:text-base">Performance analysis and GPA impact statements.</p>
+                        <h1 class="text-2xl md:text-3xl font-bold text-brand-maroon mb-1">Academic Curriculum</h1>
+                        <p class="text-gray-500 text-sm md:text-base">Full BBICT program structure and requirements.</p>
                     </div>
                     <div class="bg-brand-maroon/5 p-4 rounded-2xl flex items-center gap-4 border border-brand-maroon/10">
                          <div class="w-10 h-10 rounded-full bg-brand-maroon text-white flex items-center justify-center">
@@ -591,10 +677,14 @@
                     </div>
                 </header>
 
-                <div id="smart-courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Populated via JS -->
-                    <div class="col-span-full text-center py-12 text-gray-400 italic bg-white rounded-3xl border border-dashed border-gray-200">
-                        No courses added yet. Go to Dashboard to add your first course.
+                <!-- FULL CURRICULUM LIST -->
+                <div class="space-y-6">
+                    <header>
+                        <h2 class="text-xl font-bold text-gray-800">BBICT Full Curriculum</h2>
+                        <p class="text-xs text-gray-500">All available courses for this program.</p>
+                    </header>
+                    <div id="curriculum-list" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
