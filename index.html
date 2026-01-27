@@ -392,12 +392,12 @@
                                         Subjects</div>
                                 </div>
                                 <div>
-                                    <div class="text-xl md:text-3xl font-bold text-gray-800">61</div>
+                                    <div id="dash-sub-max" class="text-xl md:text-3xl font-bold text-gray-800">61</div>
                                     <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">
                                         Total Req</div>
                                 </div>
                                 <div>
-                                    <div id="gpa-display" class="text-xl md:text-3xl font-bold text-gray-800">0.0</div>
+                                    <div id="gpa-display" class="text-xl md:text-3xl font-bold text-gray-800">0.00</div>
                                     <div class="text-[10px] md:text-sm text-gray-500 mt-1 uppercase tracking-wider">GPA
                                     </div>
                                 </div>
@@ -448,7 +448,7 @@
                                         <h3 class="text-sm font-bold text-gray-700">Academic Subjects</h3>
                                         <div class="text-xs text-gray-500"><span
                                                 class="current font-bold text-brand-maroon">0</span> / <span
-                                                class="max">61</span> Subjects</div>
+                                                id="req-sub-max" class="max font-bold">61</span> Subjects</div>
                                     </div>
                                     <div class="w-full bg-gray-100 rounded-full h-2 shadow-inner">
                                         <div class="progress-bar-fill bg-brand-maroon h-2 rounded-full transition-all duration-500 shadow-sm" id="progress-bar-fill"></div>
@@ -672,7 +672,7 @@
                          </div>
                          <div>
                             <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Current GPA</p>
-                            <p id="courses-view-gpa" class="text-2xl font-bold text-brand-maroon leading-none">0.0</p>
+                            <p id="courses-view-gpa" class="text-2xl font-bold text-brand-maroon leading-none">0.00</p>
                          </div>
                     </div>
                 </header>
@@ -716,58 +716,89 @@
                     </p>
                 </header>
 
-                <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-                    <div
-                        class="p-4 md:p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between sm:items-center bg-gray-50/50">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <h2 class="text-lg font-bold text-gray-800">Enrolled Students</h2>
-                            <!-- Bulk Actions (Hidden by default) -->
-                            <div id="bulk-actions"
-                                class="hidden flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
-                                <div class="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
-                                <span id="selection-count"
-                                    class="text-[10px] font-bold text-brand-maroon uppercase tracking-widest mr-2">0
-                                    Selected</span>
-                                <button onclick="AdminDashboard.bulkEmail()"
-                                    class="flex items-center gap-1 px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all">
-                                    <i class="ph-paper-plane-tilt-fill"></i> Email
-                                </button>
-                                <button onclick="AdminDashboard.confirmBulkDelete()"
-                                    class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-600 hover:text-white transition-all">
-                                    <i class="ph-trash-fill"></i> Delete
-                                </button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Students Table (Main) -->
+                    <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden lg:col-span-2">
+                        <div
+                            class="p-4 md:p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between sm:items-center bg-gray-50/50">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                <h2 class="text-lg font-bold text-gray-800">Enrolled Students</h2>
+                                <!-- Bulk Actions (Hidden by default) -->
+                                <div id="bulk-actions"
+                                    class="hidden flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                                    <div class="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
+                                    <span id="selection-count"
+                                        class="text-[10px] font-bold text-brand-maroon uppercase tracking-widest mr-2">0
+                                        Selected</span>
+                                    <button onclick="AdminDashboard.bulkEmail()"
+                                        class="flex items-center gap-1 px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all">
+                                        <i class="ph-paper-plane-tilt-fill"></i> Email
+                                    </button>
+                                    <button onclick="AdminDashboard.confirmBulkDelete()"
+                                        class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-600 hover:text-white transition-all">
+                                        <i class="ph-trash-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" placeholder="Search students..."
+                                    class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-800 focus:border-brand-maroon outline-none w-full sm:w-auto">
                             </div>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="text" placeholder="Search students..."
-                                class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-800 focus:border-brand-maroon outline-none w-full sm:w-auto">
-                            <button
-                                class="bg-brand-maroon hover:bg-[#631a42] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Export
-                                CSV</button>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left min-w-[600px]">
+                                <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                    <tr>
+                                        <th class="px-6 py-4 w-10">
+                                            <input type="checkbox" id="select-all-students"
+                                                onclick="AdminDashboard.toggleAll(this.checked)"
+                                                class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer" title="Select all students">
+                                        </th>
+                                        <th class="px-6 py-4">Student</th>
+                                        <th class="px-6 py-4">Reg Number</th>
+                                        <th class="px-6 py-4">Progress</th>
+                                        <th class="px-6 py-4">Documents</th>
+                                        <th class="px-6 py-4">Status</th>
+                                        <th class="px-6 py-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body" class="divide-y divide-gray-100">
+                                    <!-- JS Populated -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left min-w-[600px]">
-                            <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                <tr>
-                                    <th class="px-6 py-4 w-10">
-                                        <input type="checkbox" id="select-all-students"
-                                            onclick="AdminDashboard.toggleAll(this.checked)"
-                                            class="rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer" title="Select all students">
-                                    </th>
-                                    <th class="px-6 py-4">Student</th>
-                                    <th class="px-6 py-4">Reg Number</th>
-                                    <th class="px-6 py-4">Progress</th>
-                                    <th class="px-6 py-4">Documents</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="student-table-body" class="divide-y divide-gray-100">
-                                <!-- JS Populated -->
-                            </tbody>
-                        </table>
+                    <!-- Curriculum Manager (Side) -->
+                    <div class="space-y-6">
+                        <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                            <h2 class="text-lg font-bold text-gray-800 mb-6 font-display">Manage Curriculum</h2>
+                            
+                            <form id="admin-add-subject-form" class="space-y-4 mb-8" onsubmit="event.preventDefault(); AdminDashboard.addSubject();">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Subject Code</label>
+                                    <input type="text" id="new-subject-code" placeholder="e.g., BIT 1201" 
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-brand-maroon uppercase">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Subject Name</label>
+                                    <input type="text" id="new-subject-name" placeholder="e.g., Advanced Computing" 
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-brand-maroon">
+                                </div>
+                                <button type="submit" 
+                                    class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
+                                    Add Subject
+                                </button>
+                            </form>
+
+                            <div class="space-y-3">
+                                <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Live Curriculum</h3>
+                                <div id="admin-curriculum-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -795,8 +826,11 @@
                         <h2 id="review-name" class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Student Name
                         </h2>
                         <p id="review-reg"
-                            class="text-sm font-mono font-bold text-brand-maroon bg-brand-maroon/10 px-3 py-1 rounded-full mb-8">
+                            class="text-sm font-mono font-bold text-brand-maroon bg-brand-maroon/10 px-3 py-1 rounded-full mb-2">
                             REG/2026/001</p>
+                        <p id="review-phone" class="text-xs font-bold text-gray-500 mb-8 flex items-center gap-1">
+                            <i class="ph-phone-fill"></i> 0770123456
+                        </p>
 
                         <div class="w-full space-y-4 mb-auto">
                             <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">

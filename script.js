@@ -2,29 +2,72 @@
 // APP STATE & CONFIGURATION
 // ==========================================
 const App = {
-    // BBICT Course List
-    AVAILABLE_COURSES: [
-        "Introduction to Computing",
-        "Fundamentals of Programming",
-        "Digital Logic Design",
-        "Discrete Structures",
-        "Object Oriented Programming",
-        "Data Structures and Algorithms",
-        "Database Management Systems",
-        "Computer Organization & Architecture",
-        "Operating Systems",
-        "Software Engineering",
-        "Computer Networks",
-        "Web Technologies",
-        "Artificial Intelligence",
-        "Information Security",
-        "Mobile Application Development",
-        "Human Computer Interaction",
-        "Cloud Computing",
-        "Capstone Project I",
-        "Capstone Project II",
-        "Professional Ethics in IT"
+    // Default BBICT Course List (used only on first run)
+    DEFAULT_COURSES: [
+        "BUCU 001 Communication Skills",
+        "BPY 1101 Basic Electricity and Optics",
+        "BIT 1106 Introduction to Computer Application packages",
+        "BIT 1101 Computer Architecture",
+        "BMA 1106 Foundation Mathematics",
+        "BAF 1101 Financial Accounting I",
+        "BBM 1101 Introduction To Business Studies",
+        "ABCU 001 Research methodology",
+        "BEG 2112 Digital Electronics and Logics",
+        "BIT 2102 Fundamentals of Internet",
+        "BMA 1202 Discrete Mathematics",
+        "BBM 1201 Principles of Management",
+        "BAF 1201 Financial Accounting II",
+        "BAF 2105 Business Law",
+        "BBM 2103 Organizational Behaviour",
+        "BAF 1203 Accounting Information Systems",
+        "BIT 1201 Database Systems",
+        "BIT 4204 E-commerce",
+        "BIT 2202 Business Information System Analysis and Design",
+        "BIT 1202 Introduction To Web Design",
+        "BAF 2102 Cost Accounting",
+        "BBM 1202 Principles of Marketing",
+        "BIT 3233 Internet of Things",
+        "BIT 2201 Computer Programming Methodology",
+        "BIT 2203 Data Structure and Algorithms",
+        "BIT 2204 Data Communication And Computer Networks",
+        "BAF 2202 Management Accounting I",
+        "BAF 2104 Financial Management I",
+        "BAF 3108 Risk Management",
+        "BMA 1104 Probability & Statistics I",
+        "BMA 3201 Operations Research I",
+        "BIT 3101 Software Engineering",
+        "BIT 3204 Network Management",
+        "BIT 3201 Object Oriented Analysis and Design",
+        "BIT 3102 Event Driven Programming",
+        "BIT 3130 Signals and systems",
+        "BIT 3104 Analogue and Digital Communications",
+        "BMA 2102 Probability and statistics 2",
+        "BBM 3107 Human Resource Management",
+        "BIT 3106 Object Oriented Programming",
+        "BIT 4202 Artificial Intelligence",
+        "BIT 3205 Business Systems Simulation and Modeling",
+        "BIT 3105 Management Information Systems",
+        "BIT 3206 ICT project management",
+        "BIT 3222 Structured cabling",
+        "BIT 3234 Data Analytics in Python",
+        "BIT 4102 Computer Graphics",
+        "BIT 4103 Human Computer Interaction",
+        "BIT 4104 Security and Cryptography",
+        "BIT 4108 Information Systems Audit",
+        "BIT 3228 Machine Learning",
+        "BBM 4214 Total Quality Management",
+        "BIT 4203 Distributed Multimedia Systems",
+        "BIT 4201 Mobile Communications",
+        "BIT 4206 ICT In Business and Society",
+        "BIT 4107 Mobile Applications Development",
+        "BIT 4122 Telecommunications Switching and Transmission Systems",
+        "BIT 4119 Spectrum Management",
+        "BIT 4140 Data Visualization"
     ],
+
+    get AVAILABLE_COURSES() {
+        return this.data.config.availableCourses;
+    },
 
     currentUser: null,
     data: {
@@ -35,7 +78,10 @@ const App = {
                 role: "admin",
                 name: "Admin User"
             }
-        ]
+        ],
+        config: {
+            availableCourses: []
+        }
     },
 
     init() {
@@ -75,6 +121,13 @@ const App = {
         const stored = localStorage.getItem('degreefi_data_v2');
         if (stored) {
             this.data = JSON.parse(stored);
+            
+            // Migrate old data if config/courses missing
+            if (!this.data.config) this.data.config = { availableCourses: this.DEFAULT_COURSES };
+            if (!this.data.config.availableCourses || this.data.config.availableCourses.length === 0) {
+                this.data.config.availableCourses = this.DEFAULT_COURSES;
+            }
+
             this.data.users.forEach(u => {
                 if (u.role === 'admin') return;
 
@@ -87,7 +140,7 @@ const App = {
                 if (!u.requirements || u.requirements.total || !u.requirements.manualClearance) {
                     const existingManual = (u.requirements && u.requirements.manualClearance) ? u.requirements.manualClearance : {};
                     u.requirements = {
-                        subjects: { current: u.courses.length, max: 61 },
+                        subjects: { current: u.courses.length, max: App.AVAILABLE_COURSES.length },
                         manualClearance: existingManual
                     };
                 }
@@ -158,7 +211,7 @@ const App = {
             courses: [],
             files: [],
             requirements: {
-                subjects: { current: 0, max: 61 },
+                subjects: { current: 0, max: App.AVAILABLE_COURSES.length },
                 // Milestones & Clearance Documents are tracked via their existence in 'files' or manual admin flags
                 manualClearance: {} // e.g., { "Financial Clearance": true }
             },
@@ -521,7 +574,8 @@ const StudentDashboard = {
         const courses = App.currentUser.courses;
 
         // 1. Graduation Status Card
-        const completedSubjects = Math.min(61, reqs.subjects.current);
+        const subMax = App.AVAILABLE_COURSES.length;
+        const completedSubjects = Math.min(subMax, reqs.subjects.current);
         const mandatoryDocs = [
             "Financial Clearance",
             "Library Clearance",
@@ -541,7 +595,7 @@ const StudentDashboard = {
         const gpaPass = gpa >= 2.0;
         
         const totalCompleted = completedSubjects + docScore;
-        const totalPossible = 66;
+        const totalPossible = subMax + 5; // Subjects + 5 Docs
         const percent = Math.round((totalCompleted / totalPossible) * 100);
         const isEligible = percent >= 100 && gpaPass;
 
@@ -564,8 +618,11 @@ const StudentDashboard = {
 
         // 2. Academic Stats
         document.getElementById('req-sub-count').textContent = completedSubjects;
-        document.getElementById('req-sub-percent').textContent = `${Math.round((completedSubjects / 61) * 100)}%`;
-        document.getElementById('req-sub-bar').style.width = `${(completedSubjects / 61) * 100}%`;
+        const subMaxEl = document.getElementById('req-sub-max');
+        if (subMaxEl) subMaxEl.textContent = subMax;
+        
+        document.getElementById('req-sub-percent').textContent = `${Math.round((completedSubjects / subMax) * 100)}%`;
+        document.getElementById('req-sub-bar').style.width = `${(completedSubjects / subMax) * 100}%`;
         document.getElementById('req-gpa').textContent = gpa.toFixed(2);
         document.getElementById('req-gpa').className = `text-2xl font-bold ${gpaPass ? 'text-green-600' : 'text-red-500'}`;
 
@@ -665,6 +722,9 @@ const StudentDashboard = {
 
         // Render Full Curriculum List
         this.renderCurriculum();
+        
+        // Refresh dropdown to ensure it includes admin-added subjects
+        this.populateCourseDropdown();
     },
 
     renderCurriculum() {
@@ -784,8 +844,8 @@ const StudentDashboard = {
             return;
         }
 
-        if (App.currentUser.requirements.subjects.current >= 61) {
-            App.showModal('warning', 'Limit Reached', 'You have already added 61 subjects. Please remove one if you need to replace it.');
+        if (App.currentUser.requirements.subjects.current >= App.AVAILABLE_COURSES.length) {
+            App.showModal('warning', 'Limit Reached', `You have already added ${App.AVAILABLE_COURSES.length} subjects. Please remove one if you need to replace it.`);
             return;
         }
 
@@ -955,8 +1015,9 @@ const StudentDashboard = {
         const reqs = App.currentUser.requirements;
         const files = App.currentUser.files || [];
 
-        // BBICT Progress: 61 subjects + 5 mandatory docs = 66 Total Units
-        const completedSubjects = Math.min(61, reqs.subjects.current);
+        // Graduation Progress Calculation
+        const subMax = App.AVAILABLE_COURSES.length;
+        const completedSubjects = Math.min(subMax, reqs.subjects.current);
 
         const mandatoryDocs = [
             "Financial Clearance",
@@ -974,12 +1035,16 @@ const StudentDashboard = {
         });
 
         const totalCompleted = completedSubjects + docScore;
-        const totalPossible = 66;
+        const totalPossible = subMax + 5; // Subjects + 5 Docs
 
         const percent = Math.min(100, Math.round((totalCompleted / totalPossible) * 100));
 
         document.getElementById('total-percent').textContent = `${percent}%`;
         document.getElementById('credits-earned').textContent = completedSubjects;
+        
+        const dashMaxEl = document.getElementById('dash-sub-max');
+        if (dashMaxEl) dashMaxEl.textContent = subMax;
+        
         document.getElementById('progress-ring').setAttribute('stroke-dasharray', `${percent}, 100`);
 
         // GPA
@@ -1304,91 +1369,155 @@ const AdminDashboard = {
 
         if (students.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-500 italic">No students registered yet.</td></tr>';
+        } else {
+            students.forEach(student => {
+                const reqs = student.requirements;
+                const files = student.files || [];
+
+                // Progress Calculation
+                const subMax = App.AVAILABLE_COURSES.length;
+                const completedSubjects = Math.min(subMax, reqs.subjects.current);
+                const mandatoryDocs = ["Financial Clearance", "Library Clearance", "Transcript", "Academic Internship", "Project Defense"];
+
+                let docScore = 0;
+                mandatoryDocs.forEach(doc => {
+                    const file = files.find(f => f.category === doc);
+                    const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc]);
+                    if (isCleared) docScore++;
+                });
+
+                const percent = Math.round(((completedSubjects + docScore) / (subMax + 5)) * 100);
+                const isEligible = percent >= 100;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/[0.02] transition-colors student-row';
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <input type="checkbox" value="${student.email}" onchange="AdminDashboard.updateBulkActions()"
+                            class="student-checkbox rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                                ${student.name.charAt(0)}
+                            </div>
+                            <div>
+                                <div class="font-medium text-white">${student.name}</div>
+                                <div class="text-[10px] text-slate-500 flex flex-col">
+                                    <span>${student.email}</span>
+                                    <span class="text-slate-400 font-mono">${student.phone || 'No phone'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm font-mono font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded">
+                            ${student.regNumber || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden shadow-inner">
+                                <div class="h-full rounded-full transition-all duration-700 ${isEligible ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-sky-400 to-indigo-500'}" style="width: ${Math.min(100, percent)}%"></div>
+                            </div>
+                            <span class="text-xs font-bold text-gray-500 w-8 text-right">${percent}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center -space-x-2">
+                            ${mandatoryDocs.map(doc => {
+                                const file = files.find(f => f.category === doc);
+                                const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc]);
+                                return `<div title="${doc}" class="w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold ${isCleared ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-400'}">${doc.charAt(0)}</div>`;
+                            }).join('')}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isEligible ? 'bg-green-500/10 text-green-400' : 'bg-slate-700 text-slate-400'}">
+                            ${isEligible ? 'GRADUATED' : 'STUDYING'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="AdminDashboard.openReview('${student.email}')" 
+                            class="text-brand-maroon hover:text-white hover:bg-brand-maroon px-3 py-1 rounded-lg text-xs font-bold transition-all border border-brand-maroon">
+                            REVIEW
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        this.renderCurriculumManager();
+    },
+
+    renderCurriculumManager() {
+        const list = document.getElementById('admin-curriculum-list');
+        if (!list) return;
+        list.innerHTML = '';
+
+        App.AVAILABLE_COURSES.forEach((course, index) => {
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm hover:border-brand-maroon/20';
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${index + 1}</span>
+                    <span class="font-medium text-gray-800">${course}</span>
+                </div>
+                <button onclick="AdminDashboard.confirmDeleteSubject('${course}')" class="text-gray-400 hover:text-red-500 p-1">
+                    <i class="ph-trash text-lg"></i>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    },
+
+    addSubject() {
+        const code = document.getElementById('new-subject-code').value.trim().toUpperCase();
+        const name = document.getElementById('new-subject-name').value.trim();
+
+        if (!code || !name) {
+            App.showModal('warning', 'Incomplete Data', 'Please provide both a subject code and a subject name.');
             return;
         }
 
+        const fullSubject = `${code} ${name}`;
+        if (App.data.config.availableCourses.includes(fullSubject)) {
+            App.showModal('error', 'Duplicate Subject', 'This subject already exists in the curriculum.');
+            return;
+        }
+
+        App.data.config.availableCourses.push(fullSubject);
+        App.saveData();
+        
+        // Broadcast notification to all BBICT students
+        const students = App.data.users.filter(u => u.role === 'student');
         students.forEach(student => {
-            const reqs = student.requirements;
-            const files = student.files || [];
-
-            // 61 subjects + 5 mandatory docs = 66
-            const completedSubjects = Math.min(61, reqs.subjects.current);
-            const mandatoryDocs = ["Financial Clearance", "Library Clearance", "Transcript", "Academic Internship", "Project Defense"];
-
-            let docScore = 0;
-            mandatoryDocs.forEach(doc => {
-                const file = files.find(f => f.category === doc);
-                const isCleared = (file && file.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc]);
-                if (isCleared) docScore++;
-            });
-
-            const percent = Math.round(((completedSubjects + docScore) / 66) * 100);
-            const isEligible = percent >= 100;
-
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/[0.02] transition-colors student-row';
-            tr.innerHTML = `
-                <td class="px-6 py-4">
-                    <input type="checkbox" value="${student.email}" onchange="AdminDashboard.updateBulkActions()"
-                        class="student-checkbox rounded text-brand-maroon focus:ring-brand-maroon border-gray-300 cursor-pointer">
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
-                            ${student.name.charAt(0)}
-                        </div>
-                        <div>
-                            <div class="font-medium text-white">${student.name}</div>
-                            <div class="text-xs text-slate-500">${student.email}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="text-sm font-mono font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded">
-                        ${student.regNumber || 'N/A'}
-                    </span>
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden shadow-inner">
-                            <div class="h-full rounded-full transition-all duration-700 ${isEligible ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-sky-400 to-indigo-500'}" style="width: ${Math.min(100, percent)}%"></div>
-                        </div>
-                        <span class="text-xs font-bold text-gray-500 w-8 text-right">${percent}%</span>
-                    </div>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide border border-gray-200">
-                        <i class="ph-files-fill mr-1 opacity-50"></i> ${student.files.length} Docs
-                    </span>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${isEligible ? 'bg-green-100 text-green-700 border border-green-200 shadow-sm shadow-green-100' : 'bg-amber-100 text-amber-700 border border-amber-200 shadow-sm shadow-amber-100'}">
-                        <span class="w-1.5 h-1.5 rounded-full mr-2 ${isEligible ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}"></span>
-                        ${isEligible ? 'Graduated' : 'Pending'}
-                    </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                        <button onclick="AdminDashboard.openReview('${student.email}')" 
-                            class="p-2 text-brand-maroon hover:bg-brand-maroon hover:text-white rounded-lg transition-all border border-brand-maroon/20 bg-white shadow-sm"
-                            title="Review & Edit Profile">
-                            <i class="ph-eye-fill text-lg"></i>
-                        </button>
-                        <button onclick="AdminDashboard.sendEmail('${student.email}', ${isEligible})" 
-                            class="p-2 text-gray-500 hover:bg-gray-800 hover:text-white rounded-lg transition-all border border-gray-200 bg-white shadow-sm"
-                            title="Send Quick Status">
-                            <i class="ph-paper-plane-tilt-fill text-lg"></i>
-                        </button>
-                        <button onclick="AdminDashboard.confirmDelete('${student.email}')" 
-                            class="p-2 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all border border-red-200 bg-white shadow-sm"
-                            title="Delete Student">
-                            <i class="ph-trash-fill text-lg"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            this.dispatchNotification(
+                student, 
+                'New Course Added', 
+                `Administrator has added "${fullSubject}" to the BBICT curriculum. You can now add this course to your records.`,
+                false // Don't show success modal for every student
+            );
         });
+
+        // Reset form
+        document.getElementById('new-subject-code').value = '';
+        document.getElementById('new-subject-name').value = '';
+
+        this.renderCurriculumManager();
+        App.showModal('success', 'Subject Added & Broadcast', `"${fullSubject}" has been added and ${students.length} students have been notified.`);
+    },
+
+    confirmDeleteSubject(subject) {
+        App.showModal('delete', 'Delete Subject?', `Are you sure you want to remove "${subject}" from the curriculum? Students who have already added this course will keep it, but it will no longer be available for others.`, () => {
+            const index = App.data.config.availableCourses.indexOf(subject);
+            if (index !== -1) {
+                App.data.config.availableCourses.splice(index, 1);
+                App.saveData();
+                this.renderCurriculumManager();
+            }
+        }, { confirmText: 'Delete', showCancel: true });
     },
 
     sendEmail(email, isEligible) {
@@ -1487,7 +1616,6 @@ const AdminDashboard = {
             bulkDiv.classList.add('hidden');
         }
 
-        // Keep master checkbox in sync
         if (masterCb) {
             masterCb.checked = checked.length === checkboxes.length && checkboxes.length > 0;
             masterCb.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
@@ -1498,55 +1626,34 @@ const AdminDashboard = {
         const emails = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
         if (emails.length === 0) return;
 
-        App.showModal('warning', 'Bulk Notification', `You are about to send status updates to ${emails.length} selected students. This will check each student's specific eligibility and send the appropriate message.`, () => {
+        App.showModal('warning', 'Bulk Notification', `You are about to send status updates to ${emails.length} selected students.`, () => {
             emails.forEach(email => {
                 const student = App.data.users.find(u => u.email === email);
                 if (student) {
-                    const reqs = student.requirements;
-                    const files = student.files || [];
-
-                    // Calculate BBICT Progress
-                    const completedSubjects = Math.min(61, reqs.subjects.current);
+                    const subMax = App.AVAILABLE_COURSES.length;
+                    const completedSubjects = Math.min(subMax, student.requirements.subjects.current);
                     const mandatoryDocs = ["Financial Clearance", "Library Clearance", "Transcript", "Academic Internship", "Project Defense"];
-
                     let docScore = 0;
                     mandatoryDocs.forEach(doc => {
-                        if (files.some(f => f.category === doc) || (reqs.manualClearance && reqs.manualClearance[doc])) docScore++;
+                        const file = student.files.find(f => f.category === doc);
+                        if ((file && file.status === 'cleared') || (student.requirements.manualClearance && student.requirements.manualClearance[doc])) docScore++;
                     });
-
-                    const percent = Math.round(((completedSubjects + docScore) / 66) * 100);
+                    const percent = Math.round(((completedSubjects + docScore) / (subMax + 5)) * 100);
                     const isEligible = percent >= 100;
-                    const missingFiles = mandatoryDocs.filter(doc => !files.some(f => f.category === doc) && !(reqs.manualClearance && reqs.manualClearance[doc]));
 
-                    let title, message;
-                    if (missingFiles.length > 0) {
-                        title = 'Action Required: Missing Documents';
-                        message = `Attention: We've identified that your profile is missing required document(s): ${missingFiles.join(", ")}. Please log in and upload these immediately.`;
-                    } else if (!isEligible) {
-                        title = 'Progress Update: Requirements Pending';
-                        message = `Notification Sent: Your documents are in order, but you still have pending credit requirements (${completedSubjects}/61 subjects completed). Keep up the good work!`;
-                    } else {
-                        title = 'Graduation Discovery: Officially Cleared';
-                        message = `Congratulations! All your documents are verified and you have met all credit requirements. You are officially cleared for graduation!`;
-                    }
-
-                    this.dispatchNotification(student, title, message, false);
+                    this.dispatchNotification(student, 'Status Report', `Your current graduation progress is at ${percent}%. Keep it up!`, false);
                 }
             });
             App.showModal('success', 'Bulk Dispatch Complete', `Successfully sent notifications to ${emails.length} students.`);
             this.toggleAll(false);
-            if (document.getElementById('select-all-students')) document.getElementById('select-all-students').checked = false;
-        }, {
-            showCancel: true,
-            confirmText: 'Send to All'
-        });
+        }, { showCancel: true, confirmText: 'Send to All' });
     },
 
     confirmBulkDelete() {
         const emails = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
         if (emails.length === 0) return;
 
-        App.showModal('delete', 'Bulk Delete Students?', `Are you sure you want to remove ${emails.length} selected students? This action is permanent and cannot be undone.`, () => {
+        App.showModal('delete', 'Bulk Delete Students?', 'Are you sure? This action is permanent.', () => {
             emails.forEach(email => {
                 const idx = App.data.users.findIndex(u => u.email === email);
                 if (idx !== -1) App.data.users.splice(idx, 1);
@@ -1554,12 +1661,7 @@ const AdminDashboard = {
             App.saveData();
             this.render();
             this.updateBulkActions();
-            if (document.getElementById('select-all-students')) document.getElementById('select-all-students').checked = false;
-            App.showModal('success', 'Action Complete', `${emails.length} student records have been deleted.`);
-        }, {
-            showCancel: true,
-            confirmText: 'Delete Selected'
-        });
+        }, { showCancel: true, confirmText: 'Delete Selected' });
     },
 
     // --- Student Detail Review & Edit ---
@@ -1569,37 +1671,32 @@ const AdminDashboard = {
     openReview(email) {
         const student = App.data.users.find(u => u.email === email);
         if (!student) return;
-
         this.currentReviewUser = student;
         const modal = document.getElementById('admin-review-modal');
-
-        // Header
         document.getElementById('review-avatar').textContent = student.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         document.getElementById('review-name').textContent = student.name;
         document.getElementById('review-reg').textContent = student.regNumber || 'N/A';
-
+        const phoneEl = document.getElementById('review-phone');
+        if (phoneEl) phoneEl.innerHTML = `<i class="ph-phone-fill"></i> ${student.phone || 'N/A'}`;
         this.updateReviewStats();
         this.renderReviewSubjects();
         this.renderReviewClearance();
         this.switchReviewTab('courses');
-
         modal.classList.remove('hidden');
     },
 
     closeReview() {
         document.getElementById('admin-review-modal').classList.add('hidden');
         this.currentReviewUser = null;
-        this.render(); // Refresh main table
+        this.render();
     },
 
     switchReviewTab(tab) {
         document.querySelectorAll('.review-tab').forEach(t => t.classList.remove('active', 'bg-brand-maroon', 'text-white'));
         document.querySelectorAll('.review-tab').forEach(t => t.classList.add('bg-white', 'text-gray-500'));
-
         const activeTab = document.getElementById(`tab-${tab}`);
         activeTab.classList.add('active', 'bg-brand-maroon', 'text-white');
         activeTab.classList.remove('bg-white', 'text-gray-500');
-
         document.querySelectorAll('.review-section').forEach(s => s.classList.add('hidden'));
         document.getElementById(`review-section-${tab}`).classList.remove('hidden');
     },
@@ -1608,167 +1705,66 @@ const AdminDashboard = {
         const student = this.currentReviewUser;
         const reqs = student.requirements;
         const files = student.files || [];
-
-        const completedSubjects = Math.min(61, reqs.subjects.current);
+        const subMax = App.AVAILABLE_COURSES.length;
+        const completedSubjects = Math.min(subMax, reqs.subjects.current);
         const mandatoryDocs = ["Financial Clearance", "Library Clearance", "Transcript", "Academic Internship", "Project Defense"];
-
         let docScore = 0;
         mandatoryDocs.forEach(doc => {
-            if (files.some(f => f.category === doc) || (reqs.manualClearance && reqs.manualClearance[doc])) docScore++;
+            if (files.some(f => f.category === doc && f.status === 'cleared') || (reqs.manualClearance && reqs.manualClearance[doc])) docScore++;
         });
-
-        const percent = Math.round(((completedSubjects + docScore) / 66) * 100);
+        const percent = Math.round(((completedSubjects + docScore) / (subMax + 5)) * 100);
         document.getElementById('review-percent').textContent = `${percent}%`;
         document.getElementById('review-progress-ring').setAttribute('stroke-dasharray', `${percent}, 100`);
-        document.getElementById('review-subject-count').textContent = `${completedSubjects} / 61`;
     },
 
     renderReviewSubjects() {
         const list = document.getElementById('review-subjects-list');
+        if (!list) return;
         list.innerHTML = '';
-        const student = this.currentReviewUser;
-
-        if (student.courses.length === 0) {
-            list.innerHTML = '<p class="text-center py-8 text-gray-400 italic">No subjects added by student.</p>';
-            return;
-        }
-
-        student.courses.forEach((c, idx) => {
+        this.currentReviewUser.courses.forEach(c => {
             const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 group transition-all hover:bg-white hover:shadow-md';
-            div.innerHTML = `
-                <div class="flex-1 min-w-0 pr-4">
-                    <p class="text-xs font-bold text-gray-800 truncate">${c.name}</p>
-                    <p class="text-[10px] text-gray-400">Recorded: ${c.date}</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <select onchange="AdminDashboard.updateReviewGrade(${idx}, this.value)" class="bg-white border-0 text-sm font-bold text-brand-maroon outline-none cursor-pointer p-1 rounded">
-                        <option value="4.0" ${c.grade === 4.0 ? 'selected' : ''}>A</option>
-                        <option value="3.0" ${c.grade === 3.0 ? 'selected' : ''}>B</option>
-                        <option value="2.0" ${c.grade === 2.0 ? 'selected' : ''}>C</option>
-                        <option value="1.0" ${c.grade === 1.0 ? 'selected' : ''}>D</option>
-                        <option value="0.0" ${c.grade === 0.0 ? 'selected' : ''}>F</option>
-                    </select>
-                    <button onclick="AdminDashboard.removeReviewSubject(${idx})" class="text-gray-300 hover:text-red-500 transition-colors">
-                        <i class="ph-trash text-lg"></i>
-                    </button>
-                </div>
-            `;
+            div.className = 'p-3 bg-white border border-gray-100 rounded-xl flex justify-between items-center';
+            div.innerHTML = `<div><p class="font-bold text-gray-800 text-sm">${c.name}</p><p class="text-[10px] text-gray-400 uppercase">${c.date}</p></div><div class="text-brand-maroon font-black">${this.getGradeLetter(c.grade)}</div>`;
             list.appendChild(div);
         });
-    },
-
-    updateReviewGrade(idx, grade) {
-        const course = this.currentReviewUser.courses[idx];
-        const oldGrade = course.grade;
-        const newGrade = parseFloat(grade);
-        course.grade = newGrade;
-        
-        // Update subject count if changing between Pass/Fail status
-        // Pass -> Fail : Decrement
-        if (oldGrade > 0 && newGrade === 0) {
-            this.currentReviewUser.requirements.subjects.current = Math.max(0, this.currentReviewUser.requirements.subjects.current - 1);
-        }
-        // Fail -> Pass : Increment
-        else if (oldGrade === 0 && newGrade > 0) {
-            this.currentReviewUser.requirements.subjects.current += 1;
-        }
-
-        const gradeMap = { "4": "A", "4.0": "A", "3": "B", "3.0": "B", "2": "C", "2.0": "C", "1": "D", "1.0": "D", "0": "F", "0.0": "F" };
-        const oldLetter = gradeMap[oldGrade.toString()] || oldGrade;
-        const newLetter = gradeMap[newGrade.toString()] || grade;
-
-        if (oldGrade !== parseFloat(grade)) {
-            const message = `Academic Update: Your grade for "${course.name}" has been updated from ${oldLetter} to ${newLetter} by the registrar.`;
-            this.dispatchNotification(this.currentReviewUser, 'Subject Grade Updated', message, false);
-        }
-
-        App.saveData();
-        this.updateReviewStats();
-    },
-
-    removeReviewSubject(idx) {
-        const course = this.currentReviewUser.courses[idx];
-        this.currentReviewUser.courses.splice(idx, 1);
-        
-        // Only update count if it was a passing grade
-        if (course.grade > 0) {
-            this.currentReviewUser.requirements.subjects.current = Math.max(0, this.currentReviewUser.requirements.subjects.current - 1);
-        }
-        // Safety re-calc
-        this.currentReviewUser.requirements.subjects.current = this.currentReviewUser.courses.filter(c => c.grade > 0).length;
-        
-        App.saveData();
-        this.renderReviewSubjects();
-        this.updateReviewStats();
     },
 
     renderReviewClearance() {
         const list = document.getElementById('review-clearance-list');
+        if (!list) return;
         list.innerHTML = '';
-        const student = this.currentReviewUser;
         const mandatoryDocs = [
-            { id: 'Financial Clearance', label: 'Financial' },
-            { id: 'Library Clearance', label: 'Library' },
-            { id: 'Transcript', label: 'Transcript' },
-            { id: 'Academic Internship', label: 'Academic Internship' },
-            { id: 'Project Defense', label: 'Project Defense' }
+            { id: 'Financial Clearance', label: 'Financial Clearance' },
+            { id: 'Library Clearance', label: 'Library Clearance' },
+            { id: 'Transcript', label: 'Verified Transcript' },
+            { id: 'Academic Internship', label: 'Industrial Attachment' },
+            { id: 'Project Defense', label: 'Final Project Defense' }
         ];
-
-        mandatoryDocs.forEach((doc, idx) => {
+        mandatoryDocs.forEach(doc => {
+            const student = this.currentReviewUser;
             const uploadedFile = student.files.find(f => f.category === doc.id);
             const isManuallyCleared = student.requirements.manualClearance && student.requirements.manualClearance[doc.id];
-
-            // Determine status
             let status, statusLabel, statusColor, statusBg;
             if (isManuallyCleared || (uploadedFile && uploadedFile.status === 'cleared')) {
-                status = 'cleared';
-                statusLabel = 'Cleared';
-                statusColor = 'text-green-700';
-                statusBg = 'bg-green-100 border-green-200';
+                status = 'cleared'; statusLabel = 'Cleared'; statusColor = 'text-green-700'; statusBg = 'bg-green-100 border-green-200';
             } else if (uploadedFile && uploadedFile.status === 'in-review') {
-                status = 'in-review';
-                statusLabel = 'In Review';
-                statusColor = 'text-amber-700';
-                statusBg = 'bg-amber-100 border-amber-200';
+                status = 'in-review'; statusLabel = 'In Review'; statusColor = 'text-amber-700'; statusBg = 'bg-amber-100 border-amber-200';
             } else {
-                status = 'pending';
-                statusLabel = 'Pending';
-                statusColor = 'text-gray-500';
-                statusBg = 'bg-gray-100 border-gray-200';
+                status = 'pending'; statusLabel = 'Pending'; statusColor = 'text-gray-500'; statusBg = 'bg-gray-100 border-gray-200';
             }
-
             const div = document.createElement('div');
             div.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100';
-            div.innerHTML = `
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-gray-800">${doc.label}</h4>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${statusBg} ${statusColor}">${statusLabel}</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    ${uploadedFile ? `
-                        <button onclick="AdminDashboard.viewStudentFile('${doc.id}')" class="px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all">
-                            <i class="ph-eye"></i> View
-                        </button>
-                    ` : ''}
-                    ${status === 'in-review' ? `
-                        <button onclick="AdminDashboard.approveDocument('${doc.id}')" class="px-3 py-1.5 bg-green-500 text-white text-[10px] font-bold rounded-lg hover:bg-green-600 transition-all">
-                            <i class="ph-check-circle"></i> Approve
-                        </button>
-                    ` : ''}
-                    <div class="flex items-center gap-2">
-                        <span class="text-[8px] font-bold uppercase tracking-widest text-gray-400">Manual Clear</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" ${isManuallyCleared ? 'checked' : ''} onchange="AdminDashboard.toggleReviewManualClear('${doc.id}', this.checked)" class="sr-only peer">
-                            <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
-                    </div>
-                </div>
-            `;
+            div.innerHTML = `<div class="flex-1"><h4 class="text-sm font-bold text-gray-800">${doc.label}</h4><div class="mt-1"><span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${statusBg} ${statusColor}">${statusLabel}</span></div></div><div class="flex items-center gap-2">${uploadedFile ? `<button onclick="AdminDashboard.viewStudentFile('${doc.id}')" class="px-3 py-1.5 bg-brand-maroon/10 text-brand-maroon text-[10px] font-bold rounded-lg hover:bg-brand-maroon hover:text-white transition-all"><i class="ph-eye"></i> View</button>` : ''}${status === 'in-review' ? `<button onclick="AdminDashboard.approveDocument('${doc.id}')" class="px-3 py-1.5 bg-green-500 text-white text-[10px] font-bold rounded-lg hover:bg-green-600 transition-all"><i class="ph-check-circle"></i> Approve</button>` : ''}<div class="flex items-center gap-2"><span class="text-[8px] font-bold uppercase tracking-widest text-gray-400">Manual</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" ${isManuallyCleared ? 'checked' : ''} onchange="AdminDashboard.toggleReviewManualClear('${doc.id}', this.checked)" class="sr-only peer"><div class="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div></label></div></div>`;
             list.appendChild(div);
         });
+    },
+
+    getGradeLetter(points) {
+        if (points >= 4.0) return 'A';
+        if (points >= 3.0) return 'B';
+        if (points >= 2.0) return 'C';
+        if (points >= 1.0) return 'D';
+        return 'F';
     },
 
     viewStudentFile(category) {
@@ -1776,55 +1772,17 @@ const AdminDashboard = {
         if (!student) return;
         const file = student.files.find(f => f.category === category);
         if (!file) return;
-
         const win = window.open('', '_blank');
-        if (!win) {
-            App.showModal('error', 'Popup Blocked', 'Please allow popups to view student documents.');
-            return;
-        }
-
+        if (!win) { App.showModal('error', 'Popup Blocked', 'Please allow popups to view student documents.'); return; }
         const isImage = file.data.startsWith('data:image/');
-
-        let content = '';
-        if (isImage) {
-            content = `<img src="${file.data}" style="max-width:95%; max-height:95%; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-radius: 12px;">`;
-        } else {
-            content = `<iframe src="${file.data}" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen></iframe>`;
-        }
-
-        win.document.write(`
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Review: ${category} - ${student.name}</title>
-                    <style>
-                        body { margin:0; background: #0f172a; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: sans-serif; }
-                        .close-tip { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; pointer-events: none; }
-                    </style>
-                </head>
-                <body>
-                    <div class="close-tip">Press Esc to close window</div>
-                    ${content}
-                    <script>
-                        window.addEventListener('keydown', (e) => { if(e.key === 'Escape') window.close(); });
-                    </script>
-                </body>
-            </html>
-        `);
+        let content = isImage ? `<img src="${file.data}" style="max-width:90%; border-radius:12px;">` : `<iframe src="${file.data}" style="width:100%; height:100%;" frameborder="0"></iframe>`;
+        win.document.write(`<html><body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center; height:100vh;">${content}</body></html>`);
         win.document.close();
     },
 
     toggleReviewManualClear(docId, state) {
         if (!this.currentReviewUser.requirements.manualClearance) this.currentReviewUser.requirements.manualClearance = {};
-
-        const alreadyCleared = !!this.currentReviewUser.requirements.manualClearance[docId];
         this.currentReviewUser.requirements.manualClearance[docId] = state;
-
-        if (state && !alreadyCleared) {
-            const message = `Clearance Update: Your "${docId}" has been officially cleared by the registrar.`;
-            this.dispatchNotification(this.currentReviewUser, 'Document Cleared', message, false);
-        }
-
         App.saveData();
         this.updateReviewStats();
         this.renderReviewClearance();
@@ -1833,44 +1791,21 @@ const AdminDashboard = {
     approveDocument(category) {
         const file = this.currentReviewUser.files.find(f => f.category === category);
         if (!file) return;
-
         file.status = 'cleared';
         App.saveData();
         this.updateReviewStats();
         this.renderReviewClearance();
-
-        const message = `Document Approved: Your "${category}" has been reviewed and approved by the registrar. This now counts toward your graduation requirements.`;
-        this.dispatchNotification(this.currentReviewUser, 'Clearance Approved', message, false);
-
-        App.showModal('success', 'Document Approved', `${category} has been approved and marked as cleared.`);
+        App.showModal('success', 'Approved', `${category} is now cleared.`);
     },
 
     sendCustomMessage() {
-        const titleEl = document.querySelector('#review-msg-title');
-        const bodyEl = document.querySelector('#review-msg-body');
-
-        const title = titleEl ? titleEl.value.trim() : '';
-        const message = bodyEl ? bodyEl.value.trim() : '';
-
-        if (!title || !message) {
-            App.showModal('warning', 'Empty Fields', 'Please provide both a title and a message body.');
-            return;
-        }
-
-        if (!this.currentReviewUser) {
-            App.showModal('error', 'Error', 'No student selected for review.');
-            return;
-        }
-
-        // Dispatch notification with feedback enabled
-        AdminDashboard.dispatchNotification(this.currentReviewUser, title, message, true);
-
-        // Clear fields
-        if (titleEl) titleEl.value = '';
-        if (bodyEl) bodyEl.value = '';
-    },
-
-    _dummy() { }
+        const title = document.querySelector('#review-msg-title').value.trim();
+        const body = document.querySelector('#review-msg-body').value.trim();
+        if (!title || !body) return;
+        AdminDashboard.dispatchNotification(this.currentReviewUser, title, body, true);
+        document.querySelector('#review-msg-title').value = '';
+        document.querySelector('#review-msg-body').value = '';
+    }
 };
 
 // Initialize
