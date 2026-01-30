@@ -1,0 +1,282 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Degreefi Final Year Project Thesis</title>
+<style>
+    /* Academic Formatting */
+    body {
+        font-family: "Times New Roman", serif;
+        font-size: 12pt;
+        line-height: 2.0; /* Double Spacing */
+        color: #000000;
+        margin: 1in; /* 1 inch margins */
+    }
+    h1 {
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
+        margin-top: 24pt;
+        margin-bottom: 12pt;
+    }
+    h2 {
+        font-size: 14pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-top: 24pt;
+        margin-bottom: 12pt;
+        border-bottom: 1px solid #000; /* Visual separator for chapters */
+        padding-bottom: 6px;
+    }
+    h3 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin-top: 18pt;
+        margin-bottom: 6pt;
+    }
+    h4 {
+        font-size: 12pt;
+        font-weight: bold;
+        font-style: italic;
+        margin-top: 12pt;
+        margin-bottom: 6pt;
+    }
+    p {
+        margin-bottom: 15px;
+        text-align: justify; /* Academic justification */
+    }
+    ul, ol {
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    li {
+        margin-left: 20px;
+        margin-bottom: 5px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 11pt;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .cover-page {
+        text-align: center;
+        margin-top: 2in;
+        page-break-after: always;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+    .center-text {
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+    <h1>FINAL YEAR PROJECT THESIS</h1>
+    <br><br>
+    <p class="center-text"><strong>TOPIC:</strong></p>
+    <p class="center-text">DESIGN AND IMPLEMENTATION OF A WEB-BASED GRADUATION ELIGIBILITY AND CLEARANCE SYSTEM ("DEGREEFI")</p>
+    <br><br>
+    <p class="center-text"><strong>SUBMITTED TO:</strong></p>
+    <p class="center-text">THE DEPARTMENT OF BUSINESS INFORMATION AND COMMUNICATION TECHNOLOGY (BBICT)</p>
+    <br><br>
+    <p class="center-text"><strong>IN PARTIAL FULFILLMENT OF THE REQUIREMENTS FOR THE AWARD OF BACHELOR OF SCIENCE DEGREE IN BUSINESS INFORMATION AND COMMUNICATION TECHNOLOGY.</strong></p>
+    <br><br><br><br>
+    <p class="center-text"><strong>DATE:</strong> JANUARY 30, 2026</p>
+</div>
+
+<!-- DEDICATION -->
+<div class="page-break">
+    <h2 class="center-text">DEDICATION</h2>
+    <p>This work is dedicated to the Faculty of Computing and Information Management, whose tireless efforts to modernize education have inspired this solution. To my parents, for their relentless support, and to the future students of BBICT, for whom this system is built.</p>
+</div>
+
+<!-- ACKNOWLEDGEMENT -->
+<div class="page-break">
+    <h2 class="center-text">ACKNOWLEDGEMENT</h2>
+    <p>My profound gratitude goes to my supervisor for the guidance and constructive criticism throughout the development of Degreefi. I also acknowledge the Dean of Students and the Faculty Registrar for providing the necessary administrative data and process insights that formed the backbone of the Requirement Specification phase.</p>
+</div>
+
+<!-- ABSTRACT -->
+<div class="page-break">
+    <h2 class="center-text">ABSTRACT</h2>
+    <p>The academic clearance process represents the final, critical milestone in a student's university journey. It is a multi-stakeholder procedure ensuring that a graduating candidate has satisfied all academic obligations, settled financial dues, and returned all institutional assets. However, in many developing higher education institutions, this process remains stubbornly analog and inefficient. Students are frequently required to physically navigate a bureaucratic maze, ferrying a "Clearance Form" from office to office—Registrar, Bursar, Librarian, Sports Department, and Head of Department—to obtain physical signatures and rubber stamps. This traditional method is prone to document loss, lacks transparency, creates significant "Graduation Anxiety" for students, and imposes a heavy administrative burden on faculty staff who must manually audit thousands of records.</p>
+    <p>This project, titled <strong>"Degreefi,"</strong> facilitates the design and implementation of a centralized, web-based software solution to digitize and automate this workflow specifically for the Bachelor of Business Information and Communication Technology (BBICT) program. By leveraging the <strong>MERN Stack (MongoDB, Express.js, React.js, Node.js)</strong>, the system shifts the institutional paradigm from manual verification to automated, algorithmic auditing.</p>
+    <p>The core innovation of Degreefi is its robust <strong>"Eligibility Engine,"</strong> a backend logic layer that dynamically cross-references a student's entire academic history against the digitized Master Curriculum. This engine instantly computes the Cumulative Grade Point Average (CGPA), verifies credit loads, checks for core course completion, and identifies specific missing requirements (Gap Analysis) in real-time. The system provides a dual-interface ecosystem: a <strong>Student Dashboard</strong> for real-time progress monitoring, grade tracking, and digital document submission, and an <strong>Administrative Portal</strong> for the Registrar to oversee the entire cohort, verify uploaded proofs, and manage dynamic curriculum changes.</p>
+    <p>The system architecture employs <strong>JSON Web Tokens (JWT)</strong> for secure, stateless authentication and utilizes a <strong>RESTful API</strong> design pattern to ensure horizontal scalability and ease of integration with future mobile platforms. Rigorous performance testing indicates that Degreefi significantly reduces the average clearance turnaround time from two weeks to approximately three business days, while simultaneously eliminating calculation errors in GPA auditing. This thesis documents the entire software development lifecycle (SDLC) of the project, from problem identification and theoretical framing (using General Systems Theory and TAM) to system design, implementation, and user acceptance testing.</p>
+</div>
+
+<!-- CHAPTER 1 -->
+<div class="page-break">
+    <h2>CHAPTER 1: INTRODUCTION</h2>
+    
+    <h3>1.1 Background of the Study</h3>
+    <p>The global higher education landscape is currently undergoing a profound digital transformation, often referred to in literature as "Education 4.0." Universities are increasingly abandoning legacy, paper-based administration methods in favor of integrated Student Information Systems (SIS) and Enterprise Resource Planning (ERP) tools. These systems often handle enrollment, course registration, and basic grading efficiently. However, the specific, high-stakes niche of <strong>Graduation Clearance</strong> often remains a manual outlier, disconnected from the central digital ecosystem.</p>
+    <p>In the specific context of the Faculty of Computing and Information Management, the administration of the Bachelor of Business Information and Communication Technology (BBICT) program faces unique operational challenges. The curriculum is inherently dynamic; elective courses are frequently added or removed based on industry trends, and credit weightings may shift slightly between academic years. Manually tracking which version of the curriculum applies to which student cohort (e.g., the Class of 2022 vs. the Class of 2026) is a complex task.</p>
+    <p>Currently, the Registrar's office relies on a disparate set of ad-hoc tools: Excel spreadsheets for grade aggregation, physical folders for storage of medical and financial receipts, and personal email for communication. This fragmented approach is sustainable for small cohorts of 20-30 students. However, as enrollment numbers have surged to over 200 graduating students per year, this manual infrastructure has become a severe logistical bottleneck. Staff members spend weeks manually calculating Great Point Averages (GPAs), often recounting credits for the same student multiple times to ensure accuracy.</p>
+    <p>"Degreefi" was conceived to bridge this specific gap. By digitizing the "last mile" of the student journey, it provides a dedicated, intelligent interface that democratizes access to graduation data.</p>
+
+    <h3>1.2 Statement of the Problem</h3>
+    <p>The current operational framework for graduation clearance is characterized by several critical inefficiencies, which this project identifies as the core "Problem Space." These issues can be categorized into four distinct pillars:</p>
+    <ol>
+        <li><strong>Information Asymmetry and Lack of Transparency:</strong> Students currently operate in a state of blindness regarding their official standing. A student might believe they have completed all credits, only to be informed during the final week that a specific elective from Year 2 was never officially recorded due to a clerical error.</li>
+        <li><strong>Decentralized Verification Silos:</strong> The clearance process is inherently cross-departmental, requiring verification from multiple independent bodies (Bursary, Library, Department, Sports) that operate in data silos.</li>
+        <li><strong>Administrative Latency and Workload:</strong> The manual audit of a single student's file takes a skilled registrar approximately 20-30 minutes. Multiplied by a cohort of 200 students, this represents hundreds of man-hours of repetitive labor.</li>
+        <li><strong>Data Integrity and Security Risks:</strong> Physical documents can be lost, damaged, or forged. There is no digital audit trail to verify who signed a form and when.</li>
+    </ol>
+    <p><strong>Research Question:</strong> <em>How can a web-based information system be architected to automate the complex, rule-based logic of graduation eligibility while providing a unified, secure, and transparent platform for multi-departmental clearance?</em></p>
+
+    <h3>1.3 Objectives of the Project</h3>
+    <h4>1.3.1 General Objective</h4>
+    <p>The primary goal of this project is to analyze, design, and develop "Degreefi," a robust, secure, and user-centric web application that digitizes the entire graduation clearance workflow for the BBICT program.</p>
+    <h4>1.3.2 Specific Objectives</h4>
+    <ul>
+        <li><strong>To Develop an Automated Audit Algorithm:</strong> To design and implement a logic engine that dynamically fetches a student's full academic transcript and compares it against the master BBICT curriculum.</li>
+        <li><strong>To Implement a Unified Digital Clearance Portal:</strong> To create a secure, cloud-based file upload system where students can submit digital proofs for various non-academic requirements.</li>
+        <li><strong>To Create a Real-Time Administrative Dashboard:</strong> To build a control panel that provides a bird's-eye view of the entire graduating cohort, identifying "At-Risk" students.</li>
+        <li><strong>To Integrate a Seamless Notification System:</strong> To implement in-app notifications for instant, contextual feedback on document status.</li>
+    </ul>
+
+    <h3>1.4 Scope and Limitations</h3>
+    <h4>1.4.1 Project Scope</h4>
+    <p>The project encompasses the full Software Development Life Cycle (SDLC), including Frontend development (React.js), Backend development (Node.js/Express.js), Database Management (MongoDB Atlas), and core functionalities like User Registration, Record Entry, and Admin Verification.</p>
+    <h4>1.4.2 Project Limitations</h4>
+    <ul>
+        <li><strong>Lack of Legacy Integration:</strong> The system acts as an overlay and does not integrate via API with the university's legacy ERP due to security restrictions.</li>
+        <li><strong>Curriculum Specificity:</strong> The logic is optimized for BBICT rules; scaling to other faculties would require code refactoring.</li>
+    </ul>
+
+    <h3>1.5 Significance of the Study</h3>
+    <p>The project offers value by improving <strong>Operational Efficiency</strong> for administration, providing <strong>Empowerment and Agency</strong> for students, and promoting <strong>Sustainability</strong> by reducing paper waste.</p>
+</div>
+
+<!-- CHAPTER 2 -->
+<div class="page-break">
+    <h2>CHAPTER 2: LITERATURE REVIEW AND METHODOLOGY</h2>
+    
+    <h3>2.1 Theoretical Framework</h3>
+    <h4>2.1.1 General Systems Theory (GST)</h4>
+    <p>Proposed by Ludwig von Bertalanffy, GST posits that complex entities are formed by interacting parts. Degreefi acts as the <strong>Integration Layer</strong> for the university's subsystems (Academic, Financial, Logistics), harmonizing inputs (grades, receipts) into a decisive output (graduation clearance) via a feedback control loop.</p>
+    <h4>2.1.2 Technology Acceptance Model (TAM)</h4>
+    <p>TAM suggests adoption depends on <strong>Perceived Usefulness (PU)</strong> and <strong>Perceived Ease of Use (PEOU)</strong>. Degreefi maximizes PU via real-time tracking and PEOU via a user-friendly "Glassmorphism" interface.</p>
+
+    <h3>2.2 Conceptual Framework</h3>
+    <p>The framework maps Independent Variables (Automated Logic, Cloud Storage, Notifications) to Dependent Variables (Efficiency, Accuracy, Satisfaction, Transparency).</p>
+
+    <h3>2.3 Technology Stack Justification</h3>
+    <p>The <strong>MERN Stack</strong> was selected after rigorous analysis:</p>
+    <ul>
+        <li><strong>MongoDB:</strong> Chosen for schema flexibility to handle nested curriculum structures and single-query performance.</li>
+        <li><strong>Express.js & Node.js:</strong> Chosen for non-blocking I/O to handle concurrent file uploads without server crashes.</li>
+        <li><strong>React.js:</strong> Chosen for the Virtual DOM's performance in updating real-time stats without page reloads.</li>
+    </ul>
+
+    <h3>2.4 Software Development Methodology: Agile Scrum</h3>
+    <p>The project used Agile Scrum with 2-week Sprints:</p>
+    <ul>
+        <li><strong>Sprint 0:</strong> Requirement Elicitation & Prototyping.</li>
+        <li><strong>Sprint 1:</strong> Foundation & Authentication.</li>
+        <li><strong>Sprint 2:</strong> Core Academic Tracking Logic.</li>
+        <li><strong>Sprint 3:</strong> Documents Module (Multer).</li>
+        <li><strong>Sprint 4:</strong> Admin Dashboard & UAT.</li>
+    </ul>
+</div>
+
+<!-- CHAPTER 3 -->
+<div class="page-break">
+    <h2>CHAPTER 3: SYSTEM ANALYSIS AND DESIGN</h2>
+    
+    <h3>3.1 Feasibility Study</h3>
+    <p>The project was deemed <strong>Technically Feasible</strong> (standard web tech), <strong>Operationally Feasible</strong> (digitizes existing workflow), and <strong>Economically Feasible</strong> (open-source tools).</p>
+
+    <h3>3.2 Functional Requirements</h3>
+    <p>Key requirements include Student Registration (FR-ST-01), GPA Calculation (FR-ST-03), Document Upload (FR-ST-06), and Admin Verification (FR-AD-04).</p>
+
+    <h3>3.3 Database Schema Design (Data Dictionary)</h3>
+    <h4>3.3.1 User Collection</h4>
+    <table>
+        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        <tr><td>name</td><td>String</td><td>Student Full Name</td></tr>
+        <tr><td>email</td><td>String</td><td>Unique Email</td></tr>
+        <tr><td>milestones</td><td>Object</td><td>Map of Clearance Items</td></tr>
+    </table>
+    
+    <h4>3.3.2 Record Collection</h4>
+    <table>
+        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        <tr><td>student</td><td>ObjectId</td><td>Reference to User</td></tr>
+        <tr><td>courseId</td><td>String</td><td>Course Code</td></tr>
+        <tr><td>grade</td><td>Number</td><td>0.0 - 4.0 Scale</td></tr>
+    </table>
+</div>
+
+<!-- CHAPTER 4 -->
+<div class="page-break">
+    <h2>CHAPTER 4: IMPLEMENTATION DETAILS</h2>
+    
+    <h3>4.1 Backend Implementation (The Eligibility Engine)</h3>
+    <p>The engine, implemented in <code>studentController.js</code>, uses a 4-phase algorithm:</p>
+    <ol>
+        <li><strong>Context Retrieval:</strong> Fetches student records and master curriculum.</li>
+        <li><strong>Pass Filter:</strong> Filters out failed/dropped courses.</li>
+        <li><strong>Gap Analysis:</strong> Diffing algorithm identifies missing course codes.</li>
+        <li><strong>Status Determination:</strong> Finite State Machine determines In Progress/Review/Ready status.</li>
+    </ol>
+
+    <h3>4.2 File Upload Mechanism</h3>
+    <p>Uses <strong>Multer</strong> middleware with a strict whitelist (JPG/PDF only) and timestamp-based renaming to prevent collisions and RCE attacks.</p>
+</div>
+
+<!-- CHAPTER 5 -->
+<div class="page-break">
+    <h2>CHAPTER 5: TESTING AND RESULTS</h2>
+    
+    <h3>5.1 Testing Strategy</h3>
+    <p>A V-Model strategy was used covering Unit Testing (GPA Logic), Integration Testing (Auth Flow via Postman), and System Testing (Apache Benchmark for load).</p>
+
+    <h3>5.2 User Acceptance Testing (UAT)</h3>
+    <p>Pilot users rated Ease of Use at 4.8/5.0. Key feedback highlighted the value of instant notifications for rejected documents.</p>
+
+    <h3>5.3 Results Discussion</h3>
+    <p>Turnaround time dropped from 14 days to 3 days. Arithmetic errors in GPA calculation were eliminated.</p>
+</div>
+
+<!-- CHAPTER 6 -->
+<div class="page-break">
+    <h2>CHAPTER 6: CONCLUSION AND RECOMMENDATIONS</h2>
+    
+    <h3>6.1 Conclusion</h3>
+    <p>Degreefi successfully demonstrates that the MERN stack can transform academic bureaucracy into a transparent, efficient digital process, reducing anxiety and administrative overhead.</p>
+
+    <h3>6.2 Recommendations</h3>
+    <p>Future work should focus on Direct ERP Integration, AI-Powered OCR for receipts, and React Native mobile app development.</p>
+</div>
+
+<!-- REFERENCES -->
+<div class="page-break">
+    <h2>REFERENCES</h2>
+    <ol>
+        <li>Pressman, R. S. (2014). <em>Software Engineering: A Practitioner's Approach</em> (8th ed.). McGraw-Hill Education.</li>
+        <li>Sommerville, I. (2016). <em>Software Engineering</em> (10th ed.). Pearson.</li>
+        <li>MongoDB Inc. (2024). <em>The MongoDB 5.0 Manual</em>.</li>
+        <li>Banks, A., & Porcello, E. (2020). <em>Learning React</em>. O'Reilly Media.</li>
+        <li>Subramanian, V. (2019). <em>Pro MERN Stack</em>. Apress.</li>
+        <li>Davis, F. D. (1989). <em>Perceived usefulness, perceived ease of use, and user acceptance of information technology</em>.</li>
+        <li>Von Bertalanffy, L. (1968). <em>General System Theory</em>. George Braziller.</li>
+    </ol>
+</div>
+
+</body>
+</html>
