@@ -10,7 +10,9 @@ const NotificationList = ({ notifications }) => {
         >
           <div className="flex justify-between items-start mb-3">
              <h4 className="font-black text-gray-900 tracking-tight">{notif.title}</h4>
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{notif.date}</span>
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {new Date(notif.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+             </span>
           </div>
           <p className="text-sm text-gray-600 leading-relaxed font-medium">{notif.message}</p>
         </div>

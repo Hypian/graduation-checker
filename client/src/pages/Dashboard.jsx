@@ -15,16 +15,19 @@ const Dashboard = ({ user }) => {
   const [activeTab, setActiveTab] = useState(user?.role === 'admin' ? 'students' : 'dashboard')
   const [curriculum, setCurriculum] = useState([])
   const [records, setRecords] = useState([])
+  const [notifications, setNotifications] = useState(user?.notifications || [])
   const [loading, setLoading] = useState(true)
 
   const fetchData = async () => {
     try {
-      const [currRes, recRes] = await Promise.all([
+      const [currRes, recRes, notifRes] = await Promise.all([
         axios.get('/api/curriculum'),
-        axios.get('/api/student/records')
+        axios.get('/api/student/records'),
+        user?.role === 'student' ? axios.get('/api/student/notifications') : Promise.resolve({ data: [] })
       ])
       setCurriculum(currRes.data)
       setRecords(recRes.data)
+      if (user?.role === 'student') setNotifications(notifRes.data)
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
@@ -145,7 +148,7 @@ const Dashboard = ({ user }) => {
                         <i className="ph-bell-ringing-bold text-3xl text-brand-maroon"></i>
                         <h3 className="text-2xl font-black text-gray-900 tracking-tight">University Notifications</h3>
                     </div>
-                    <NotificationList notifications={user?.notifications || []} />
+                    <NotificationList notifications={notifications} />
                 </div>
               )}
 

@@ -99,10 +99,9 @@ exports.sendNotification = async (req, res) => {
         if (!student.notifications) student.notifications = [];
         
         student.notifications.unshift({
-            id: Date.now(),
             title,
             message,
-            date: new Date().toLocaleDateString(),
+            date: new Date(),
             read: false
         });
 

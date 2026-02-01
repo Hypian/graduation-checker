@@ -36,7 +36,7 @@ const CustomModal = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center animate-in fade-in duration-300">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-brand-maroon/20 backdrop-blur-md"
