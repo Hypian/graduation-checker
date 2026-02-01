@@ -8,5 +8,6 @@ router.get('/students/:id', auth, adminController.getStudentDetails);
 router.delete('/students/:id', auth, adminController.deleteStudent);
 router.post('/verify-milestone', auth, adminController.verifyMilestone);
 router.post('/send-notification', auth, adminController.sendNotification);
+router.post('/export-data', auth, adminController.getExportData);
 
 module.exports = router;

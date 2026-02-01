@@ -6,7 +6,16 @@ exports.getAllStudents = async (req, res) => {
         if (req.user.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
         
         const students = await User.find({ role: 'student' }).select('-password');
-        res.json(students);
+        
+        // Fetch record counts for each student to enable progress calculation on dashboard
+        const studentsWithStats = await Promise.all(students.map(async (student) => {
+            const recordsCount = await Record.countDocuments({ student: student._id });
+            const studentObj = student.toObject();
+            studentObj.recordsCount = recordsCount; // Add helper field for front-end
+            return studentObj;
+        }));
+
+        res.json(studentsWithStats);
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -109,5 +118,32 @@ exports.sendNotification = async (req, res) => {
         res.json({ message: 'Message dispatched successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getExportData = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+        const { studentIds } = req.body;
+        if (!studentIds || !Array.isArray(studentIds)) {
+            return res.status(400).json({ message: 'Invalid student IDs' });
+        }
+
+        const exportData = await Promise.all(studentIds.map(async (id) => {
+            const student = await User.findById(id).select('-password');
+            if (!student) return null;
+            
+            const records = await Record.find({ student: id });
+            return {
+                student,
+                records
+            };
+        }));
+
+        res.json(exportData.filter(d => d !== null));
+    } catch (err) {
+        console.error('Export Data Error:', err);
+        res.status(500).json({ message: 'Server error fetching export data' });
     }
 };

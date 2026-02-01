@@ -3,25 +3,28 @@ import axios from 'axios'
 import { useModal } from '../context/ModalContext'
 import StudentDetailModal from './StudentDetailModal'
 
-const StudentTable = () => {
-  const [students, setStudents] = useState([])
-  const [loading, setLoading] = useState(true)
+const StudentTable = ({ students = [], onSelectionChange }) => {
+  const [selectedIds, setSelectedIds] = useState([])
   const [selectedStudentId, setSelectedStudentId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { showModal } = useModal()
 
-  useEffect(() => {
-    fetchStudents()
-  }, [])
+  const toggleSelection = (id) => {
+    const newSelection = selectedIds.includes(id)
+      ? selectedIds.filter(i => i !== id)
+      : [...selectedIds, id]
+    setSelectedIds(newSelection)
+    if (onSelectionChange) onSelectionChange(newSelection)
+  }
 
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get('/api/admin/students')
-      setStudents(res.data)
-    } catch (err) {
-      console.error('Error fetching students:', err)
-    } finally {
-      setLoading(false)
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredStudents.length) {
+      setSelectedIds([])
+      if (onSelectionChange) onSelectionChange([])
+    } else {
+      const allIds = filteredStudents.map(s => s._id)
+      setSelectedIds(allIds)
+      if (onSelectionChange) onSelectionChange(allIds)
     }
   }
 
@@ -33,7 +36,7 @@ const StudentTable = () => {
       onConfirm: async () => {
         try {
             await axios.delete(`/api/admin/students/${id}`)
-            fetchStudents()
+            window.location.reload() // Refresh data via parent or full reload
             showModal({ title: 'Success', message: 'Student removed from registry.', type: 'success' })
         } catch (err) {
             showModal({ title: 'Error', message: 'Registry update failed.', type: 'error' })
@@ -42,12 +45,7 @@ const StudentTable = () => {
     })
   }
 
-  if (loading) return (
-    <div className="py-24 flex flex-col items-center justify-center gap-4 text-slate-300">
-        <div className="w-10 h-10 border-4 border-slate-100 border-t-brand-maroon rounded-full animate-spin"></div>
-        <p className="font-black italic text-[10px] uppercase tracking-widest">Syncing Registry Records...</p>
-    </div>
-  )
+  // if (loading) removed as parent handles loading
 
   const filteredStudents = students.filter(s => 
     s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -57,11 +55,11 @@ const StudentTable = () => {
   return (
     <div className="bg-white rounded-[3rem] border border-gray-100 overflow-hidden shadow-2xl shadow-slate-200/50 text-slate-900 animate-in fade-in duration-1000">
       {selectedStudentId && (
-        <StudentDetailModal 
-            studentId={selectedStudentId} 
-            onClose={() => setSelectedStudentId(null)} 
-            onRefresh={fetchStudents}
-        />
+             <StudentDetailModal 
+                studentId={selectedStudentId} 
+                onClose={() => setSelectedStudentId(null)} 
+                onRefresh={() => window.location.reload()}
+            />
       )}
 
       {/* Table Toolbar */}
@@ -83,8 +81,13 @@ const StudentTable = () => {
         <table className="w-full text-left border-collapse min-w-[800px]">
             <thead className="bg-slate-50/80 backdrop-blur-sm border-b border-gray-100">
             <tr>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest w-10">
-                    <input type="checkbox" className="rounded text-brand-maroon focus:ring-brand-maroon border-slate-200" />
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest w-10 text-center">
+                    <input 
+                        type="checkbox" 
+                        checked={filteredStudents.length > 0 && selectedIds.length === filteredStudents.length}
+                        onChange={toggleSelectAll}
+                        className="rounded text-brand-maroon focus:ring-brand-maroon border-slate-200 cursor-pointer" 
+                    />
                 </th>
                 <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Student Information</th>
                 <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Reg Number</th>
@@ -101,13 +104,18 @@ const StudentTable = () => {
                 // Calculate Progress
                 let docScore = 0;
                 mandatoryDocs.forEach(k => { if (ms[k]?.status === 'verified') docScore++; })
-                const percent = Math.round((( (student.records?.length || 0) + docScore) / (59 + 5)) * 100)
+                const percent = Math.round((( (student.recordsCount || student.records?.length || 0) + docScore) / (59 + 5)) * 100)
                 const isEligible = percent >= 100
 
                 return (
                 <tr key={student._id} className="hover:bg-brand-peach/5 transition-colors group">
-                    <td className="px-10 py-6">
-                        <input type="checkbox" className="rounded text-brand-maroon focus:ring-brand-maroon border-slate-200" />
+                    <td className="px-10 py-6 text-center">
+                        <input 
+                            type="checkbox" 
+                            checked={selectedIds.includes(student._id)}
+                            onChange={() => toggleSelection(student._id)}
+                            className="rounded text-brand-maroon focus:ring-brand-maroon border-slate-200 cursor-pointer" 
+                        />
                     </td>
                     <td className="px-10 py-6">
                     <div className="flex items-center gap-5">

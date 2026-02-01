@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useModal } from '../context/ModalContext'
 import Sidebar from '../components/Sidebar'
 import StatsCard from '../components/StatsCard'
 import AddCourseForm from '../components/AddCourseForm'
@@ -10,24 +11,33 @@ import DashboardRequirements from '../components/DashboardRequirements'
 import ClearanceUploads from '../components/ClearanceUploads'
 import NotificationList from '../components/NotificationList'
 import RequirementsChecklist from '../components/RequirementsChecklist'
+import PrintReport from '../components/PrintReport'
+import ExportModal from '../components/ExportModal'
 
 const Dashboard = ({ user }) => {
+  const { showModal } = useModal()
   const [activeTab, setActiveTab] = useState(user?.role === 'admin' ? 'students' : 'dashboard')
   const [curriculum, setCurriculum] = useState([])
   const [records, setRecords] = useState([])
+  const [students, setStudents] = useState([]) // For admin export preview
   const [notifications, setNotifications] = useState(user?.notifications || [])
+  const [selectedStudentIds, setSelectedStudentIds] = useState([])
+  const [exportData, setExportData] = useState(null)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const fetchData = async () => {
     try {
-      const [currRes, recRes, notifRes] = await Promise.all([
+      const [currRes, recRes, notifRes, studentRes] = await Promise.all([
         axios.get('/api/curriculum'),
         axios.get('/api/student/records'),
-        user?.role === 'student' ? axios.get('/api/student/notifications') : Promise.resolve({ data: [] })
+        user?.role === 'student' ? axios.get('/api/student/notifications') : Promise.resolve({ data: [] }),
+        user?.role === 'admin' ? axios.get('/api/admin/students') : Promise.resolve({ data: [] })
       ])
       setCurriculum(currRes.data)
       setRecords(recRes.data)
       if (user?.role === 'student') setNotifications(notifRes.data)
+      if (user?.role === 'admin') setStudents(studentRes.data)
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
@@ -36,13 +46,33 @@ const Dashboard = ({ user }) => {
   }
 
   useEffect(() => {
-    if (user?.role === 'student') {
+    if (user) {
         fetchData()
     }
   }, [user])
 
   const handleLogout = () => {
     window.location.href = '/login'
+  }
+
+  const handleExport = () => {
+    if (selectedStudentIds.length === 0) {
+      showModal({
+        title: 'Empty Selection',
+        message: 'Please select at least one student candidate from the registry to proceed with the export.',
+        type: 'error'
+      })
+      return
+    }
+    setIsExportModalOpen(true)
+  }
+
+  const handleExportComplete = (data) => {
+    setExportData(data)
+    setTimeout(() => {
+      window.print()
+      setExportData(null)
+    }, 500)
   }
 
   // Derived Stats
@@ -57,7 +87,9 @@ const Dashboard = ({ user }) => {
   const isEligible = records.length >= curriculum.length && curriculum.length > 0 && parseFloat(gpa) >= 2.0 && allMilestonesDone
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-brand-peach">
+    <>
+      {exportData && <PrintReport data={exportData} />}
+      <div className="flex h-screen w-full overflow-hidden bg-brand-peach print:hidden">
       <Sidebar 
         user={user} 
         activeTab={activeTab} 
@@ -134,11 +166,17 @@ const Dashboard = ({ user }) => {
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="flex justify-between items-center mb-10">
                         <h3 className="text-xl font-black text-gray-900 tracking-tight">Registered BBICT Candidates</h3>
-                        <div className="px-5 py-2.5 bg-brand-maroon text-white rounded-xl text-xs font-black shadow-lg shadow-brand-maroon/20 flex items-center gap-2">
-                            <i className="ph-export-bold"></i> Export Database
-                        </div>
+                        <button 
+                            onClick={handleExport}
+                            className="px-5 py-2.5 bg-brand-maroon text-white rounded-xl text-xs font-black shadow-lg shadow-brand-maroon/20 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <i className="ph-export-bold"></i> Export Selection {selectedStudentIds.length > 0 && `(${selectedStudentIds.length})`}
+                        </button>
                     </div>
-                    <StudentTable />
+                    <StudentTable 
+                        students={students} 
+                        onSelectionChange={setSelectedStudentIds} 
+                    />
                 </div>
               )}
 
@@ -239,10 +277,18 @@ const Dashboard = ({ user }) => {
                     <CurriculumManager />
                 </div>
               )}
+            <ExportModal 
+                isOpen={isExportModalOpen} 
+                onClose={() => setIsExportModalOpen(false)} 
+                selectedIds={selectedStudentIds} 
+                students={students}
+                onExportComplete={handleExportComplete}
+            />
            </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   )
 }
 
